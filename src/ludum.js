@@ -41,6 +41,12 @@ var ludum = function () {  // start of the ludum namespace
     'DOWN': 40,
   };
 
+  var buttons = {
+    'LEFT': 0,
+    'MIDDLE': 1,
+    'RIGHT': 2,
+  };
+
 
   //
   // Variables
@@ -521,6 +527,9 @@ var ludum = function () {  // start of the ludum namespace
   //
 
   return {
+    // Constant bundles
+    'keycodes': keycodes,
+    'buttons': buttons,
     // Game variables
     'config': config,
     'globals': globals,
