@@ -144,6 +144,23 @@ var ludum = function () {  // start of the ludum namespace
   }
 
 
+  function addChangeStateAtTimeEvent(stateName, t, targetState, eventMethods)
+  {
+    var newEvent = _makeEvent(timeTrigger, null, eventMethods);
+    // Extra properties
+    newEvent.t = t;
+    newEvent.wrappedEnter = newEvent.enter;
+    newEvent.enter = function () {
+      if (this.wrappedEnter)
+        this.wrappedEnter();
+      changeState(this.targetState);
+    }
+    newEvent.targetState = targetState;
+
+    config.states[stateName].push(newEvent);
+  }
+
+
   function addKeyPressEvent(stateName, key, duration, eventMethods)
   {
     var trigger = keyTrigger;
