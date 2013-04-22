@@ -36,7 +36,7 @@ var ludum = function () {  // start of the ludum namespace
   var keycodes = {
     'ESCAPE': 27,
     'LEFT': 37,
-    'RIGHT': 39.
+    'RIGHT': 39,
     'UP': 38,
     'DOWN': 40,
   };
@@ -281,7 +281,7 @@ var ludum = function () {  // start of the ludum namespace
   // Main game logic.
   //
 
-  function main()
+  function start(initialStateName)
   {
     window.requestAnimFrame = (function() {
       return window.requestAnimationFrame ||
@@ -293,6 +293,10 @@ var ludum = function () {  // start of the ludum namespace
                window.setTimeout(callback, 1000/60);
              };
     })();
+
+    // Set the initial state for the game.
+    changeState(initialStateName);
+
     _mainLoop();
   }
 
@@ -300,8 +304,8 @@ var ludum = function () {  // start of the ludum namespace
   function _mainLoop()
   {
     requestAnimFrame(_mainLoop);
-    draw();
-    update();
+    _draw();
+    _update();
   }
 
 
@@ -415,11 +419,11 @@ var ludum = function () {  // start of the ludum namespace
     globals.pendingEvents = [];
 
     // Change the state.
-    if (globals.currentState.leave)
+    if (globals.currentState && globals.currentState.leave)
       globals.currentState.leave();
     globals.prevState = globals.currentState;
     globals.currentState = config.states[newStateName];
-    if (globals.currentState.enter())
+    if (globals.currentState.enter)
       globals.currentState.enter();
   
     // Populate the pending event list from the new state.
@@ -452,15 +456,15 @@ var ludum = function () {  // start of the ludum namespace
   function clearKeyboard()
   {
     // Clear the keyboard state.
-    for (key in game.keysDown)
-      game.keysDown[key] = false;
+    for (key in globals.keysDown)
+      globals.keysDown[key] = false;
   }
   
   
   function anyKeyPressed()
   {
     for (key in game.keysDown) {
-      if (game.keysDown[key])
+      if (globals.keysDown[key])
         return true;
     }
     return false;
@@ -475,15 +479,15 @@ var ludum = function () {  // start of the ludum namespace
   
   function _keyDown(event)
   {
-    game.keysDown[event.keyCode] = true;
-    game.keysDown[String.fromCharCode(event.keyCode)] = true;
+    globals.keysDown[event.keyCode] = true;
+    globals.keysDown[String.fromCharCode(event.keyCode)] = true;
   }
   
   
   function _keyUp(event)
   {
-    game.keysDown[event.keyCode] = false;
-    game.keysDown[String.fromCharCode(event.keyCode)] = false;
+    globals.keysDown[event.keyCode] = false;
+    globals.keysDown[String.fromCharCode(event.keyCode)] = false;
   }
 
 
@@ -501,7 +505,7 @@ var ludum = function () {  // start of the ludum namespace
   function anyButtonPressed()
   {
     for (btn in game.mouse.buttonsDown) {
-      if (game.mouse.buttonsDown[btn])
+      if (globals.mouse.buttonsDown[btn])
         return true;
     }
     return false;
@@ -565,7 +569,7 @@ var ludum = function () {  // start of the ludum namespace
     'timeTrigger': timeTrigger,
     'timeExpire': timeExpire,
     // Main game loop
-    'main': main,
+    'start': start,
     'changeState': changeState,
     'changeToPrevState': changeToPrevState,
     // Input handling
