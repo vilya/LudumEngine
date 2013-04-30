@@ -10,16 +10,16 @@
 // - mouse
 // Can enable and disable input devices independently.
 
+// Done: Sound library
+// - Support for loops (i.e. background music) and one-off sounds (e.g. sfx).
+// - Function to add an audio tag to the page, given a parent.
+
 // Drawing library
 // - Support for webgl, canvas.
 // - Consistent api regardless of which back-end is being used.
 // - Option to fallback gracefully from WebGL to Canvas.
 // - Function to add a drawing area to the page, given a parent.
 // - Text rendering
-
-// Sound library
-// - Support for loops (i.e. background music) and one-off sounds (e.g. sfx).
-// - Function to add an audio tag to the page, given a parent.
 
 // Sprites
 // - Static or animated.
@@ -55,6 +55,8 @@ var ludum = function () {  // start of the ludum namespace
   // Holds game configuration data - stuff that shouldn't change once set up.
   var config = {
     'states': {},
+    'sounds': {},
+    'externalUpdate': false,  // If false, ludum.js calls _update() during the render loop. If true, it doesn't and you're expected to call ludum.update() from your own code.
   };
 
   // Holds the current state of the game while running.
@@ -62,8 +64,9 @@ var ludum = function () {  // start of the ludum namespace
     'lastT': 0,           // The current game time (in ms since datum).
     'lastStateT': 0,      // The time we last changed states at (in ms since datum).
     'stateT': 0,          // The amount of time we've been in the current state for, in seconds.
-    'currentState': null, // The current game state. Set this to a valid state before starting the game.
-    'prevState': null,    // The previous state we were in, useful for coming back from e.g. a pause screen.
+    'nextStateName': null,// The state we should change into at the end of this update cycle.
+    'currentState': null, // The current game state.
+    'prevStateName': null,// The previous state we were in, useful for coming back from e.g. a pause screen.
     'activeEvents': [],   // The currently active events for the current state.
     'pendingEvents': [],  // The events still waiting to be activated for the current state.
 
@@ -80,50 +83,47 @@ var ludum = function () {  // start of the ludum namespace
   // Setup and configuration
   //
 
-  function addState(name, stateMethods)
+  function addState(name, stateObj)
   {
-    var newState = _makeState(name, stateMethods);
-    config.states[name] = newState;
+    // Set up properties for internal use.
+    stateObj.name = name;
+    stateObj.events = [];
+    stateObj.initialised = false;
+
+    // Set up default implementations for any missing lifecycle methods.
+    if (!stateObj.init)
+      stateObj.init = _noop;
+    if (!stateObj.enter)
+      stateObj.enter = _noop;
+    if (!stateObj.draw)
+      stateObj.draw = _noop;
+    if (!stateObj.update)
+      stateObj.update = _noop;
+    if (!stateObj.leave)
+      stateObj.leave = _noop;
+
+    // Add the state object to the interal config.
+    config.states[name] = stateObj;
   }
 
 
-  function _makeState(name, stateMethods)
+  function _noop()
   {
-    var newState = {
-      'name': name,
-      'enter': null,
-      'draw': null,
-      'update': null,
-      'leave': null,
-      'events': [],
-    };
-
-    if (stateMethods) {
-      if (stateMethods.enter)
-        newState.enter = stateMethods.enter;
-      if (stateMethods.draw)
-        newState.draw = stateMethods.draw;
-      if (stateMethods.update)
-        newState.update = stateMethods.update;
-      if (stateMethods.leave)
-        newState.leave = stateMethods.leave;
-    }
-
-    return newState;
+    // Do nothing - that's the *point* of this function.
   }
 
 
   function addEvent(stateName, trigger, expire, eventMethods)
   {
     var newEvent = _makeEvent(trigger, expire, eventMethods);
-    config.states[stateName] = newEvent;
+    _addEvent(stateName, newEvent);
   }
 
 
   function addAlwaysOnEvent(stateName, eventMethods)
   {
-    var newEvent = _makeEvent(alwaysTrigger, newEvent, eventMethods);
-    config.states[stateName] = newEvent;
+    var newEvent = _makeEvent(alwaysTrigger, null, eventMethods);
+    _addEvent(stateName, newEvent);
   }
 
 
@@ -140,7 +140,7 @@ var ludum = function () {  // start of the ludum namespace
     if (duration > 0.0)
       newEvent.duration = duration;
 
-    config.states[stateName].push(newEvent);
+    _addEvent(stateName, newEvent);
   }
 
 
@@ -157,7 +157,7 @@ var ludum = function () {  // start of the ludum namespace
     }
     newEvent.targetState = targetState;
 
-    config.states[stateName].push(newEvent);
+    _addEvent(stateName, newEvent);
   }
 
 
@@ -170,17 +170,18 @@ var ludum = function () {  // start of the ludum namespace
 
     var newEvent = _makeEvent(trigger, expire, eventMethods);
     // Extra properties.
+    newEvent.key = key;
     if (duration > 0.0) {
       newEvent.wrappedEnter = newEvent.enter;
       newEvent.enter = function () {
-        this.t = game.lastT;
+        this.t = globals.lastT;
         if (this.wrappedEnter)
           this.wrappedEnter();
       }
       newEvent.duration = duration;
     }
 
-    config.states[stateName].push(newEvent);
+    _addEvent(stateName, newEvent);
   }
 
 
@@ -191,6 +192,7 @@ var ludum = function () {  // start of the ludum namespace
 
     var newEvent = _makeEvent(trigger, null, eventMethods);
     // Extra properties
+    newEvent.key = key;
     newEvent.wrappedEnter = newEvent.enter;
     newEvent.enter = function () {
       if (this.wrappedEnter)
@@ -199,7 +201,7 @@ var ludum = function () {  // start of the ludum namespace
     }
     newEvent.targetState = targetState;
 
-    config.states[stateName].push(newEvent);
+    _addEvent(stateName, newEvent);
   }
 
 
@@ -215,7 +217,7 @@ var ludum = function () {  // start of the ludum namespace
     }
     newEvent.targetState = targetState;
 
-    config.states[stateName].push(newEvent);
+    _addEvent(stateName, newEvent);
   }
 
 
@@ -249,6 +251,12 @@ var ludum = function () {  // start of the ludum namespace
   }
 
 
+  function _addEvent(stateName, newEvent)
+  {
+    config.states[stateName].events.push(newEvent);
+  }
+
+
   //
   // Standard event trigger and expire methods
   //
@@ -277,6 +285,15 @@ var ludum = function () {  // start of the ludum namespace
   }
 
 
+  function keyTrigger()
+  {
+    if (!this.key)
+      return anyKeyPressed();
+    else
+      return globals.keysDown[this.key];
+  }
+
+
   //
   // Main game logic.
   //
@@ -296,8 +313,28 @@ var ludum = function () {  // start of the ludum namespace
 
     // Set the initial state for the game.
     changeState(initialStateName);
+    _changeState();
 
     _mainLoop();
+  }
+
+
+  // Call this to tell ludum.js that you'll be driving the game updates by
+  // some other process, so that it knows not to call _update during the render
+  // loop.
+  function useExternalUpdates()
+  {
+    config.externalUpdate = true;
+  }
+
+
+  // This version of the update function can be called by users of ludum.js as
+  // an alternative to the built-in updating. This is to allow the updates to
+  // be driven by something other than the render loop, e.g. the physics
+  // engine.
+  function update()
+  {
+    _update();
   }
 
 
@@ -340,6 +377,7 @@ var ludum = function () {  // start of the ludum namespace
     _expireEvents();
     _updateEvents(dt);
     _triggerEvents();
+    _changeState();
   }
 
 
@@ -411,6 +449,21 @@ var ludum = function () {  // start of the ludum namespace
 
   function changeState(newStateName)
   {
+    globals.nextStateName = newStateName;
+  }
+
+
+  function changeToPrevState()
+  {
+    changeState(globals.prevStateName);
+  }
+
+
+  function _changeState()
+  {
+    if (!globals.nextStateName)
+      return;
+
     globals.lastT = Date.now();
     clearKeyboard();
 
@@ -419,12 +472,17 @@ var ludum = function () {  // start of the ludum namespace
     globals.pendingEvents = [];
 
     // Change the state.
-    if (globals.currentState && globals.currentState.leave)
+    if (globals.currentState) {
       globals.currentState.leave();
-    globals.prevState = globals.currentState;
-    globals.currentState = config.states[newStateName];
-    if (globals.currentState.enter)
-      globals.currentState.enter();
+      globals.prevStateName = globals.currentState.name;
+    }
+    globals.currentState = config.states[globals.nextStateName];
+    globals.nextStateName = null;
+    if (!globals.currentState.initialised) {
+      globals.currentState.init();
+      globals.currentState.initialised = true;
+    }
+    globals.currentState.enter();
   
     // Populate the pending event list from the new state.
     for (var i = 0; i < globals.currentState.events.length; i++)
@@ -433,12 +491,6 @@ var ludum = function () {  // start of the ludum namespace
     // Record the timestamp of the change.
     globals.lastStateT = globals.lastT;
     globals.stateT = 0.0;
-  }
-
-
-  function changeToPrevState()
-  {
-    changeState(globals.prevState.name);
   }
 
 
@@ -544,6 +596,97 @@ var ludum = function () {  // start of the ludum namespace
 
 
   //
+  // Sound effects
+  //
+
+  function addSound(name, sources) {
+    var audioElement = document.createElement('audio');
+    for (var i = 0, endI = sources.length; i < endI; i++) {
+      var sourceElement = document.createElement('source');
+      sourceElement.src = sources[i];
+      audioElement.appendChild(sourceElement);
+    }
+    config.sounds[name] = { 'name': name, 'audioElement': audioElement };
+  }
+
+
+  function playSound(name) {
+    var sound = config.sounds[name];
+    if (sound === undefined)
+      return;
+
+    if (sound.audioElement.ended) {
+      if (sound.audioElement.seekable.length > 0)
+        sound.audioElement.currentTime = sound.audioElement.seekable.start(0);
+      else
+        sound.audioElement.currentTime = 0;
+    }
+    sound.audioElement.play();
+  }
+
+
+  function stopSound(name) {
+    var sound = config.sounds[name];
+    if (sound === undefined)
+      return;
+
+    sound.audioElement.pause();
+  }
+
+
+  //
+  // Browser-related methods
+  //
+
+  // Borrowed from three.js, examples/js/Detector.js - authored by mr doob & AlteredQualia
+  function browserCapabilities()
+  {
+    return { 
+      'canvas': !! window.CanvasRenderingContext2D,
+	    'webgl': ( function () { try { return !! window.WebGLRenderingContext && !! document.createElement( 'canvas' ).getContext( 'experimental-webgl' ); } catch( e ) { return false; } } )(),
+	    'workers': !! window.Worker,
+	    'fileapi': window.File && window.FileReader && window.FileList && window.Blob
+    };
+  }
+
+
+  function showWarning(msgHTML, parentElem)
+  {
+    _showMessage(msgHTML, parentElem, '#ff8', '#000');
+ }
+
+
+  function showError(msgHTML, parentElem)
+  {
+    _showMessage(msgHTML, parentElem, '#fbb', '#700');
+  }
+
+
+  function _showMessage(msgHTML, parentElem, background, color, icon)
+  {
+    var parentNode = document.body;
+    if (parentElem)
+      parentNode = parentElem;
+
+    // TODO: add an icon and a close button to this div
+		var element = document.createElement( 'div' );
+		element.id = 'webgl-error-message';
+    element.style.fontFamily = 'sans-serif';
+		element.style.fontSize = '13px';
+		element.style.fontWeight = 'normal';
+		element.style.textAlign = 'left';
+		element.style.background = background;
+		element.style.color = color;
+		element.style.padding = '1.5em';
+		element.style.width = parentNode.innerWidth;
+		element.style.margin = '5em auto 0';
+    element.innerHTML = msgHTML;
+
+    parentNode.appendChild(element);
+  }
+
+
+  //
   // Export public symbols.
   //
 
@@ -560,6 +703,7 @@ var ludum = function () {  // start of the ludum namespace
     'addEvent': addEvent,
     'addAlwaysOnEvent': addAlwaysOnEvent,
     'addTimeEvent': addTimeEvent,
+    'addChangeStateAtTimeEvent': addChangeStateAtTimeEvent,
     'addKeyPressEvent': addKeyPressEvent,
     'addChangeStateOnKeyPressEvent': addChangeStateOnKeyPressEvent,
     'addGameConditionEvent': addGameConditionEvent,
@@ -570,289 +714,27 @@ var ludum = function () {  // start of the ludum namespace
     'timeExpire': timeExpire,
     // Main game loop
     'start': start,
+    'useExternalUpdates': useExternalUpdates,
+    'update': update,
     'changeState': changeState,
     'changeToPrevState': changeToPrevState,
     // Input handling
+    'useKeyboard': useKeyboard,
     'clearKeyboard': clearKeyboard,
     'anyKeyPressed': anyKeyPressed,
     'isKeyPressed': isKeyPressed,
+    'useMouse': useMouse,
+    'anyButtonPressed': anyButtonPressed,
+    'isButtonPressed': isButtonPressed,
+    // Sound functions
+    'addSound': addSound,
+    'playSound': playSound,
+    'stopSound': stopSound,
+    // Browser functions
+    'browserCapabilities': browserCapabilities,
+    'showWarning': showWarning,
+    'showError': showError
   };
 
 }(); // end of the ludum namespace.
-
-
-// --- The rest of the file below this point line is a copy of David Bau's excellent seedrandom.js library.
-
-// seedrandom.js version 2.0.
-// Author: David Bau 4/2/2011
-//
-// Defines a method Math.seedrandom() that, when called, substitutes
-// an explicitly seeded RC4-based algorithm for Math.random().  Also
-// supports automatic seeding from local or network sources of entropy.
-//
-// Usage:
-//
-//   <script src=http://davidbau.com/encode/seedrandom-min.js></script>
-//
-//   Math.seedrandom('yipee'); Sets Math.random to a function that is
-//                             initialized using the given explicit seed.
-//
-//   Math.seedrandom();        Sets Math.random to a function that is
-//                             seeded using the current time, dom state,
-//                             and other accumulated local entropy.
-//                             The generated seed string is returned.
-//
-//   Math.seedrandom('yowza', true);
-//                             Seeds using the given explicit seed mixed
-//                             together with accumulated entropy.
-//
-//   <script src="http://bit.ly/srandom-512"></script>
-//                             Seeds using physical random bits downloaded
-//                             from random.org.
-//
-//   <script src="https://jsonlib.appspot.com/urandom?callback=Math.seedrandom">
-//   </script>                 Seeds using urandom bits from call.jsonlib.com,
-//                             which is faster than random.org.
-//
-// Examples:
-//
-//   Math.seedrandom("hello");            // Use "hello" as the seed.
-//   document.write(Math.random());       // Always 0.5463663768140734
-//   document.write(Math.random());       // Always 0.43973793770592234
-//   var rng1 = Math.random;              // Remember the current prng.
-//
-//   var autoseed = Math.seedrandom();    // New prng with an automatic seed.
-//   document.write(Math.random());       // Pretty much unpredictable.
-//
-//   Math.random = rng1;                  // Continue "hello" prng sequence.
-//   document.write(Math.random());       // Always 0.554769432473455
-//
-//   Math.seedrandom(autoseed);           // Restart at the previous seed.
-//   document.write(Math.random());       // Repeat the 'unpredictable' value.
-//
-// Notes:
-//
-// Each time seedrandom('arg') is called, entropy from the passed seed
-// is accumulated in a pool to help generate future seeds for the
-// zero-argument form of Math.seedrandom, so entropy can be injected over
-// time by calling seedrandom with explicit data repeatedly.
-//
-// On speed - This javascript implementation of Math.random() is about
-// 3-10x slower than the built-in Math.random() because it is not native
-// code, but this is typically fast enough anyway.  Seeding is more expensive,
-// especially if you use auto-seeding.  Some details (timings on Chrome 4):
-//
-// Our Math.random()            - avg less than 0.002 milliseconds per call
-// seedrandom('explicit')       - avg less than 0.5 milliseconds per call
-// seedrandom('explicit', true) - avg less than 2 milliseconds per call
-// seedrandom()                 - avg about 38 milliseconds per call
-//
-// LICENSE (BSD):
-//
-// Copyright 2010 David Bau, all rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-// 
-//   1. Redistributions of source code must retain the above copyright
-//      notice, this list of conditions and the following disclaimer.
-//
-//   2. Redistributions in binary form must reproduce the above copyright
-//      notice, this list of conditions and the following disclaimer in the
-//      documentation and/or other materials provided with the distribution.
-// 
-//   3. Neither the name of this module nor the names of its contributors may
-//      be used to endorse or promote products derived from this software
-//      without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
-/**
- * All code is in an anonymous closure to keep the global namespace clean.
- *
- * @param {number=} overflow 
- * @param {number=} startdenom
- */
-(function (pool, math, width, chunks, significance, overflow, startdenom) {
-
-
-//
-// seedrandom()
-// This is the seedrandom function described above.
-//
-math['seedrandom'] = function seedrandom(seed, use_entropy) {
-  var key = [];
-  var arc4;
-
-  // Flatten the seed string or build one from local entropy if needed.
-  seed = mixkey(flatten(
-    use_entropy ? [seed, pool] :
-    arguments.length ? seed :
-    [new Date().getTime(), pool, window], 3), key);
-
-  // Use the seed to initialize an ARC4 generator.
-  arc4 = new ARC4(key);
-
-  // Mix the randomness into accumulated entropy.
-  mixkey(arc4.S, pool);
-
-  // Override Math.random
-
-  // This function returns a random double in [0, 1) that contains
-  // randomness in every bit of the mantissa of the IEEE 754 value.
-
-  math['random'] = function random() {  // Closure to return a random double:
-    var n = arc4.g(chunks);             // Start with a numerator n < 2 ^ 48
-    var d = startdenom;                 //   and denominator d = 2 ^ 48.
-    var x = 0;                          //   and no 'extra last byte'.
-    while (n < significance) {          // Fill up all significant digits by
-      n = (n + x) * width;              //   shifting numerator and
-      d *= width;                       //   denominator and generating a
-      x = arc4.g(1);                    //   new least-significant-byte.
-    }
-    while (n >= overflow) {             // To avoid rounding up, before adding
-      n /= 2;                           //   last byte, shift everything
-      d /= 2;                           //   right using integer math until
-      x >>>= 1;                         //   we have exactly the desired bits.
-    }
-    return (n + x) / d;                 // Form the number within [0, 1).
-  };
-
-  // Return the seed that was used
-  return seed;
-};
-
-//
-// ARC4
-//
-// An ARC4 implementation.  The constructor takes a key in the form of
-// an array of at most (width) integers that should be 0 <= x < (width).
-//
-// The g(count) method returns a pseudorandom integer that concatenates
-// the next (count) outputs from ARC4.  Its return value is a number x
-// that is in the range 0 <= x < (width ^ count).
-//
-/** @constructor */
-function ARC4(key) {
-  var t, u, me = this, keylen = key.length;
-  var i = 0, j = me.i = me.j = me.m = 0;
-  me.S = [];
-  me.c = [];
-
-  // The empty key [] is treated as [0].
-  if (!keylen) { key = [keylen++]; }
-
-  // Set up S using the standard key scheduling algorithm.
-  while (i < width) { me.S[i] = i++; }
-  for (i = 0; i < width; i++) {
-    t = me.S[i];
-    j = lowbits(j + t + key[i % keylen]);
-    u = me.S[j];
-    me.S[i] = u;
-    me.S[j] = t;
-  }
-
-  // The "g" method returns the next (count) outputs as one number.
-  me.g = function getnext(count) {
-    var s = me.S;
-    var i = lowbits(me.i + 1); var t = s[i];
-    var j = lowbits(me.j + t); var u = s[j];
-    s[i] = u;
-    s[j] = t;
-    var r = s[lowbits(t + u)];
-    while (--count) {
-      i = lowbits(i + 1); t = s[i];
-      j = lowbits(j + t); u = s[j];
-      s[i] = u;
-      s[j] = t;
-      r = r * width + s[lowbits(t + u)];
-    }
-    me.i = i;
-    me.j = j;
-    return r;
-  };
-  // For robust unpredictability discard an initial batch of values.
-  // See http://www.rsa.com/rsalabs/node.asp?id=2009
-  me.g(width);
-}
-
-//
-// flatten()
-// Converts an object tree to nested arrays of strings.
-//
-/** @param {Object=} result 
-  * @param {string=} prop
-  * @param {string=} typ */
-function flatten(obj, depth, result, prop, typ) {
-  result = [];
-  typ = typeof(obj);
-  if (depth && typ == 'object') {
-    for (prop in obj) {
-      if (prop.indexOf('S') < 5) {    // Avoid FF3 bug (local/sessionStorage)
-        try { result.push(flatten(obj[prop], depth - 1)); } catch (e) {}
-      }
-    }
-  }
-  return (result.length ? result : obj + (typ != 'string' ? '\0' : ''));
-}
-
-//
-// mixkey()
-// Mixes a string seed into a key that is an array of integers, and
-// returns a shortened string seed that is equivalent to the result key.
-//
-/** @param {number=} smear 
-  * @param {number=} j */
-function mixkey(seed, key, smear, j) {
-  seed += '';                         // Ensure the seed is a string
-  smear = 0;
-  for (j = 0; j < seed.length; j++) {
-    key[lowbits(j)] =
-      lowbits((smear ^= key[lowbits(j)] * 19) + seed.charCodeAt(j));
-  }
-  seed = '';
-  for (j in key) { seed += String.fromCharCode(key[j]); }
-  return seed;
-}
-
-//
-// lowbits()
-// A quick "n mod width" for width a power of 2.
-//
-function lowbits(n) { return n & (width - 1); }
-
-//
-// The following constants are related to IEEE 754 limits.
-//
-startdenom = math.pow(width, chunks);
-significance = math.pow(2, significance);
-overflow = significance * 2;
-
-//
-// When seedrandom.js is loaded, we immediately mix a few bits
-// from the built-in RNG into the entropy pool.  Because we do
-// not want to intefere with determinstic PRNG state later,
-// seedrandom will not call math.random on its own again after
-// initialization.
-//
-mixkey(math.random(), pool);
-
-// End anonymous scope, and pass initial values.
-})(
-  [],   // pool: entropy pool starts empty
-  Math, // math: package containing random, pow, and seedrandom
-  256,  // width: each RC4 output is 0 <= x < 256
-  6,    // chunks: at least six RC4 outputs for each double
-  52    // significance: there are 52 significant digits in a double
-);
 
