@@ -704,6 +704,10 @@ var ludum = function () {  // start of the ludum namespace
   Loader.prototype = {};
 
 
+  Loader.prototype.TEXT = 0;
+  Loader.prototype.IMAGE = 1;
+
+
   Loader.prototype.addGroup = function (name, postprocess)
   {
     if (this.groups[name])
@@ -722,32 +726,13 @@ var ludum = function () {  // start of the ludum namespace
 
   Loader.prototype.addText = function (url, /*optional*/ group, /*optional*/ postprocess)
   {
-    if (this.assets[url])
-      return;
+    this._addAsset(Loader.prototype.TEXT, url, group, postprocess);
+  }
 
-    if (this.verbose)
-      console.log("adding text asset: " + url);
 
-    req = new XMLHttpRequest();
-    req.loader = this;
-    req.onload = function () { this.loader._onLoadText(url, this.responseText); }
-    req.onerror = function () { this.loader._onFailed(url, this.statusText); }
-    
-    this.count++;
-    this.assets[url] = {
-      'req': req,
-      'group': group,
-      'postprocess': postprocess,
-      'finished': false,
-      'value': null,
-      'error': null
-    };
-
-    if (group) {
-      if (!this.groups[group])
-        this.addGroup(group);
-      this.groups[group].assets.push(url);
-    }
+  Loader.prototype.addImage = function (url, group, postprocess)
+  {
+    this._addAsset(Loader.prototype.IMAGE, url, group, postprocess);
   }
 
 
@@ -756,11 +741,8 @@ var ludum = function () {  // start of the ludum namespace
     if (this.verbose)
       console.log("loading started");
 
-    for (var url in this.assets) {
-      var req = this.assets[url].req;
-      req.open("GET", url, true);
-      req.send();
-    }
+    for (var url in this.assets)
+      this._startAsset(url);
   }
 
 
@@ -808,7 +790,63 @@ var ludum = function () {  // start of the ludum namespace
   // Loader private methods
   //
 
-  Loader.prototype._onLoadText = function (url, text)
+  Loader.prototype._addAsset = function (type, url, group, postprocess)
+  {
+    if (this.assets[url])
+      return;
+
+    if (this.verbose) {
+      var typeStr = [ "text", "image" ][type];
+      console.log("adding " + typeStr + " asset: " + url);
+    }
+
+    this.count++;
+    this.assets[url] = {
+      'type': type,
+      'group': group,
+      'postprocess': postprocess,
+      'finished': false,
+      'value': null,
+      'error': null
+    };
+
+    if (group) {
+      if (!this.groups[group])
+        this.addGroup(group);
+      this.groups[group].assets.push(url);
+    }
+  }
+
+
+  Loader.prototype._startAsset = function (url)
+  {
+    var asset = this.assets[url];
+    if (!asset)
+      return;
+
+    switch (asset.type) {
+      case Loader.prototype.TEXT:
+        var req = new XMLHttpRequest();
+        req.loader = this;
+        req.onload = function () { this.loader._onLoaded(url, this.responseText); }
+        req.onerror = function () { this.loader._onFailed(url, this.statusText); }
+        req.open("GET", url, true);
+        req.send();
+        break;
+      case Loader.prototype.IMAGE:
+        var img = new Image();
+        img.loader = this;
+        img.onload = function () { this.loader._onLoaded(url, this); }
+        img.onerror = function () { this.loader._onFailed(url, "image loading failed"); }
+        img.src = url;
+        break;
+      default:
+        break;
+    }
+  }
+
+
+  Loader.prototype._onLoaded = function (url, value)
   {
     var asset = this.assets[url];
 
@@ -816,9 +854,9 @@ var ludum = function () {  // start of the ludum namespace
     asset.finished = true;
 
     if (asset.postprocess)
-      asset.value = asset.postprocess(text);
+      asset.value = asset.postprocess(value);
     else
-      asset.value = text;
+      asset.value = value;
 
     if (asset.value) {
       this.succeeded++;
