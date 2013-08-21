@@ -574,8 +574,8 @@ var ludum = function () {  // start of the ludum namespace
   {
     var btn = event.button;
     globals.mouse.buttonsDown[btn] = true;
-    globals.mouse.x = event.x;
-    globals.mouse.y = event.y;
+    globals.mouse.x = event.clientX; // clientX is the DOM standard property.
+    globals.mouse.y = event.clientY; // clientY is the DOM standard property.
   }
 
 
@@ -583,15 +583,15 @@ var ludum = function () {  // start of the ludum namespace
   {
     var btn = event.button;
     globals.mouse.buttonsDown[btn] = false;
-    globals.mouse.x = event.x;
-    globals.mouse.y = event.y;
+    globals.mouse.x = event.clientX; // clientX is the DOM standard property.
+    globals.mouse.y = event.clientY; // clientY is the DOM standard property.
   }
 
 
   function _mouseMove(event)
   {
-    globals.mouse.x = event.x;
-    globals.mouse.y = event.y;
+    globals.mouse.x = event.clientX; // clientX is the DOM standard property.
+    globals.mouse.y = event.clientY; // clientY is the DOM standard property.
   }
 
 
@@ -643,7 +643,7 @@ var ludum = function () {  // start of the ludum namespace
   {
     return { 
       'canvas': !! window.CanvasRenderingContext2D,
-	    'webgl': ( function () { try { return !! window.WebGLRenderingContext && !! document.createElement( 'canvas' ).getContext( 'webgl' ); } catch( e ) { return false; } } )(),
+	    'webgl': (function () { try { return !! window.WebGLRenderingContext && !! document.createElement( 'canvas' ).getContext( 'experimental-webgl' ); } catch( e ) { return false; } } )(),
 	    'workers': !! window.Worker,
 	    'fileapi': window.File && window.FileReader && window.FileList && window.Blob
     };
