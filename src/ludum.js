@@ -938,6 +938,23 @@ var ludum = function () {  // start of the ludum namespace
   }
 
 
+  function clamp(value, min, max)
+  {
+    if (value <= min)
+      return min;
+    else if (value >= max)
+      return max;
+    else
+      return value;
+  }
+
+
+  function saturate(value)
+  {
+    return clamp(value, 0.0, 1.0);
+  }
+
+
   //
   // Export public symbols.
   //
@@ -992,6 +1009,8 @@ var ludum = function () {  // start of the ludum namespace
     'radians': radians,
     'degrees': degrees,
     'roundTo': roundTo,
+    'clamp': clamp,
+    'saturate': saturate
   };
 
 }(); // end of the ludum namespace.
