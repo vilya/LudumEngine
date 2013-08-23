@@ -909,6 +909,36 @@ var ludum = function () {  // start of the ludum namespace
 
 
   //
+  // Math helpers
+  //
+
+  function radians(angleInDegrees)
+  {
+    return angleInDegrees * Math.PI / 180.0;
+  }
+
+
+  function degrees(angleInRadians)
+  {
+    return angleInRadians * 180.0 / Math.PI;
+  }
+
+
+  function roundTo(value, decimalPlaces)
+  {
+    var scale = Math.pow(10, decimalPlaces);
+    var rounded = Math.floor(value * scale) / scale;
+    str = "" + rounded;
+    if (decimalPlaces > 0 && rounded == Math.floor(rounded)) {
+      str += ".";
+      for (var i = 0; i < decimalPlaces; i++)
+        str += 0;
+    }
+    return str;
+  }
+
+
+  //
   // Export public symbols.
   //
 
@@ -958,6 +988,10 @@ var ludum = function () {  // start of the ludum namespace
     'showError': showError,
     // Asset loading
     'Loader': Loader,
+    // Math helper functions
+    'radians': radians,
+    'degrees': degrees,
+    'roundTo': roundTo,
   };
 
 }(); // end of the ludum namespace.
