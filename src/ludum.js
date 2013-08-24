@@ -706,6 +706,7 @@ var ludum = function () {  // start of the ludum namespace
 
   Loader.prototype.TEXT = 0;
   Loader.prototype.IMAGE = 1;
+  Loader.prototype.CUSTOM = 2;
 
 
   Loader.prototype.addGroup = function (name, postprocess)
@@ -724,15 +725,27 @@ var ludum = function () {  // start of the ludum namespace
   }
 
 
-  Loader.prototype.addText = function (url, /*optional*/ group, /*optional*/ postprocess)
+  Loader.prototype.addText = function (url, group, postprocess)
   {
-    this._addAsset(Loader.prototype.TEXT, url, group, postprocess);
+    this._addAsset(Loader.prototype.TEXT, url, group, postprocess, null, []);
   }
 
 
   Loader.prototype.addImage = function (url, group, postprocess)
   {
-    this._addAsset(Loader.prototype.IMAGE, url, group, postprocess);
+    this._addAsset(Loader.prototype.IMAGE, url, group, postprocess, null, []);
+  }
+
+
+  // start must be a function which takes the following three arguments:
+  // - onLoad(val): a function which the custom loader must call when loading has finished successfully.
+  // - onError(val): a function which the custom loader must call when loading fails.
+  // - url: the url to load.
+  // These will be followed by any additional URLs you provided when calling this function.
+  Loader.prototype.addCustom = function (url, group, postprocess, start /*, url, url, ... */)
+  {
+    var args = Array.prototype.slice.call(arguments);
+    this._addAsset(Loader.prototype.CUSTOM, url, group, postprocess, start, args.slice(4));
   }
 
 
@@ -790,13 +803,13 @@ var ludum = function () {  // start of the ludum namespace
   // Loader private methods
   //
 
-  Loader.prototype._addAsset = function (type, url, group, postprocess)
+  Loader.prototype._addAsset = function (type, url, group, postprocess, start, extraURLs)
   {
     if (this.assets[url])
       return;
 
     if (this.verbose) {
-      var typeStr = [ "text", "image" ][type];
+      var typeStr = [ "text", "image", "custom" ][type];
       console.log("adding " + typeStr + " asset: " + url);
     }
 
@@ -807,7 +820,9 @@ var ludum = function () {  // start of the ludum namespace
       'postprocess': postprocess,
       'finished': false,
       'value': null,
-      'error': null
+      'error': null,
+      'start': start,
+      'extraURLs': extraURLs
     };
 
     if (group) {
@@ -839,6 +854,13 @@ var ludum = function () {  // start of the ludum namespace
         img.onload = function () { this.loader._onLoaded(url, this); }
         img.onerror = function () { this.loader._onFailed(url, "image loading failed"); }
         img.src = url;
+        break;
+      case Loader.prototype.CUSTOM:
+        var theLoader = this;
+        var theArgs = [ url, 
+                        function (val) { theLoader._onLoaded(url, val); },
+                        function (err) { theLoader._onFailed(url, err); } ].concat(asset.extraURLs);
+        asset.start.apply(url, theArgs);
         break;
       default:
         break;
