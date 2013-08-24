@@ -39,9 +39,10 @@ transitions into the main starting state.
 Still to do
 ===========
 
-There's lots! Here's what's planned:
+There's lots! Here's what I'm thinking:
 - WebGL-based renderer
 - Collision detection
 - Turn the state machine into a class, so you can have more than one of them
   (e.g. for NPC logic as well as game logic).
-
+- Add audio loading support to the loader, so that you can track whether all
+  the sounds you need have finished loading.
