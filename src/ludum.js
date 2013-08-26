@@ -56,7 +56,8 @@ var ludum = function () {  // start of the ludum namespace
   var config = {
     'states': {},
     'sounds': {},
-    'externalUpdate': false,  // If false, ludum.js calls _update() during the render loop. If true, it doesn't and you're expected to call ludum.update() from your own code.
+    'externalUpdate': false,      // If false, ludum.js calls _update() during the render loop. If true, it doesn't and you're expected to call ludum.update() from your own code.
+    'logStateTransitions': false, // Log changes between states if true.
   };
 
   // Holds the current state of the game while running.
@@ -473,6 +474,8 @@ var ludum = function () {  // start of the ludum namespace
 
     // Change the state.
     if (globals.currentState) {
+      if (config.logStateTransitions)
+        console.log('leaving state ' + globals.currentState.name);
       globals.currentState.leave();
       globals.prevStateName = globals.currentState.name;
     }
@@ -482,6 +485,8 @@ var ludum = function () {  // start of the ludum namespace
       globals.currentState.init();
       globals.currentState.initialised = true;
     }
+    if (config.logStateTransitions)
+      console.log('entering state ' + globals.currentState.name);
     globals.currentState.enter();
   
     // Populate the pending event list from the new state.
@@ -545,10 +550,7 @@ var ludum = function () {  // start of the ludum namespace
 
   function useMouse()
   {
-    if (globals.canvas)
-      globals.canvas.onmousedown = _mouseDown;
-    else
-      document.onmousedown = _mouseDown;
+    document.onmousedown = _mouseDown;
     document.onmouseup = _mouseUp;
     document.onmousemove = _mouseMove;
   }
