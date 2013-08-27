@@ -31,7 +31,7 @@ ludum.addSymbols(function(){
       'webGL': _hasWebGL(),
       'workers': _hasWebWorkers(),
       'fileAPI': _hasFileAPI(),
-      'pointerLock': _hasPointerLock(),
+      'pointerLock': _hasPointerLock()
     };
   }
 

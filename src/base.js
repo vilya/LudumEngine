@@ -95,7 +95,7 @@ var ludum = (function(){
     'addSymbols': addSymbols,
     'addSubmodule': addSubmodule,
     'isValidIdentifier': isValidIdentifier,
-    'require': require,
+    'require': require
   };
 }());
 

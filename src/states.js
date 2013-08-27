@@ -10,13 +10,13 @@ ludum.addSymbols(function(){
 
   var _STANDARD_STATE_VARS = {
     'name': null,
-    'transitions': [],
+    'transitions': []
   };
 
   var _STANDARD_CONTEXT_VARS = {
     'stateMachine': null,
     'currentState': -1,
-    'nextState'; -1,
+    'nextState': -1
   };
 
 
@@ -92,7 +92,7 @@ ludum.addSymbols(function(){
 
     var state = {
       'name': name,
-      'transitions': [],
+      'transitions': []
     };
     ludum.copySymbols(stateTemplate, state);
     state.enter = state.enter || _noop;

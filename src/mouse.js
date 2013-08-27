@@ -11,7 +11,7 @@ ludum.addSymbols(function(){
   var buttons = {
     'LEFT': 0,
     'MIDDLE': 1,
-    'RIGHT': 2,
+    'RIGHT': 2
   };
 
 
@@ -27,7 +27,7 @@ ludum.addSymbols(function(){
     'leftButton': false,    // Whether the left mouse button is currently pressed.
     'middleButton': false,  // Whether the middle mouse button is currently pressed.
     'rightButton': false,   // Whether the right mouse button is currently pressed.
-    'pointerLocked': false, // Whether pointer lock is currently active.
+    'pointerLocked': false  // Whether pointer lock is currently active.
   };
 
 

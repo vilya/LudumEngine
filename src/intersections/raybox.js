@@ -131,7 +131,7 @@ ludum.addSymbols(function(){
   //
 
   return {
-    'RayBoxIntersector': RayBoxIntersector,
+    'RayBoxIntersector': RayBoxIntersector
   };
 
 }());

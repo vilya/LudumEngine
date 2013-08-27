@@ -68,7 +68,7 @@ ludum.addSymbols(function(){
     'degrees': degrees,
     'roundTo': roundTo,
     'clamp': clamp,
-    'saturate': saturate,
+    'saturate': saturate
   };
 
 }());

@@ -14,7 +14,7 @@ ludum.addSymbols(function(){
   var game = new ludum.StateMachine({
     'gameT': 0.0,   // Current global time, in seconds since the start of the epoch (NOT milliseconds).
     'stateT': 0.0,  // Time we've been in the current state for, in seconds.
-    'enterT': 0.0,  // Time at which we entered the current state (a saved copy of gameT from then).
+    'enterT': 0.0   // Time at which we entered the current state (a saved copy of gameT from then).
   });
 
   var gameCtx = null;
@@ -94,7 +94,7 @@ ludum.addSymbols(function(){
     'addGameState': addGameState,
     'addGameTransition': addGameTransition,
     'addAutomaticGameTransition': addAutomaticGameTransition,
-    'startGame': startGame,
+    'startGame': startGame
   };
 
 }());

@@ -274,7 +274,7 @@ ludum.addSymbols(function(){
   //
 
   return {
-    'Loader': Loader,
+    'Loader': Loader
   };
 
 }());

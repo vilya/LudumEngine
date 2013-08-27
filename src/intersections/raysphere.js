@@ -129,7 +129,7 @@ ludum.addSymbols(function(){
   //
 
   return {
-    'RaySphereIntersector': RaySphereIntersector,
+    'RaySphereIntersector': RaySphereIntersector
   };
 
 }());
