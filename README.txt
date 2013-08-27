@@ -42,6 +42,9 @@ Still to do
 ===========
 
 There's lots! Here's what I'm thinking:
+- Unit tests
+- Documentation
+- Build script to generate a single minified file from all the src files.
 - Geometric data structures (quadtree, octree, BVH, kD-Tree).
 - Scene graph.
 - More intersection tests.
