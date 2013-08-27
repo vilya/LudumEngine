@@ -147,7 +147,7 @@ ludum.addSymbols(function(){
     if (this.contextDefaults)
       ludum.copySymbols(this.contextDefaults, ctx);
 
-    return context;
+    return ctx;
   }
 
 
