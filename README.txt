@@ -8,11 +8,14 @@ the ashes of my previous Ludum Dare entries.
 Features
 ========
 
-- An event-driven state machine, for the main game loop.
+- State machines (this is what started it all!).
+- A specialised state machine for the main game loop, so you can define your
+  game in terms of states like 'loading', 'main_menu', 'playing', etc.
 - Input handling for mouse and keyboard.
-- Asynchronous asset loading, with groups and post-processing.
+- Asynchronous asset loading, with groups and post-processing, with support for
+  text, images, audio and custom (user-defined) asset types.
 - Browser capability detection (for a limited set of browser features).
-- Geometric intersection tests
+- Geometric intersection tests.
 
 
 Usage
@@ -37,6 +40,9 @@ Note that the library is modular now, so you can include just the parts you
 need. All the parts depend on base.js though (it defines the ludum namespace),
 so be sure to include that first.
 
+Or just use the minified version of the whole library. It's only about 13 Kb
+(at time of writing), or about 3.6 Kb if you gzip it.
+
 
 Still to do
 ===========
@@ -44,7 +50,6 @@ Still to do
 There's lots! Here's what I'm thinking:
 - Unit tests
 - Documentation
-- Build script to generate a single minified file from all the src files.
 - Geometric data structures (quadtree, octree, BVH, kD-Tree).
 - Scene graph.
 - More intersection tests.
@@ -57,3 +62,6 @@ There's lots! Here's what I'm thinking:
   - SVG
 - Audio mixing support.
 - 2D and 3D positional audio.
+- HUDs
+  - Using HTML only
+  - Generating a texture from a HTLM< <canvas>
