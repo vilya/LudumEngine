@@ -1,4 +1,6 @@
-test("base/hasNameClashes", function () {
+module("base");
+
+test("hasNameClashes", function () {
   var a = { 'foo': true, 'bar': true };
   var b = { 'bar': true, 'baz': true };
   var c = { 'baz': true, 'qux': true };
@@ -8,7 +10,7 @@ test("base/hasNameClashes", function () {
 });
 
 
-test("base/copySymbols", function () {
+test("copySymbols", function () {
   var a = { 'foo': 'a', 'bar': true };
   var b = {};
   var c = { 'baz': true };
@@ -25,7 +27,7 @@ test("base/copySymbols", function () {
 });
 
 
-test("base/addSymbols", function () {
+test("addSymbols", function () {
   var exampleModule = {
     'exampleSymbol1': function () { return true; },
     'exampleSymbol2': function () { return false; },
@@ -48,7 +50,7 @@ test("base/addSymbols", function () {
 });
 
 
-test("base/addSubmodule", function () {
+test("addSubmodule", function () {
   var exampleModule = {
     'exampleSymbol1': function () { return true; },
     'exampleSymbol2': function () { return false; },
@@ -60,7 +62,7 @@ test("base/addSubmodule", function () {
 });
 
 
-test("base/isValidIdentifier", function () {
+test("isValidIdentifier", function () {
   var valid = [ "foo", "_foo", "Foo", "f", "F", "f0", "f_0", "f_", "_2" ];
   var invalid = [ "200", "foo-bar", "foo+bar", "$foo" ];
 
@@ -72,7 +74,7 @@ test("base/isValidIdentifier", function () {
 });
 
 
-test("base/require", function () {
+test("require", function () {
   var exceptionThrown;
   
   try {
