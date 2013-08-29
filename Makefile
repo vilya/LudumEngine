@@ -1,4 +1,4 @@
-CLOSURE_COMPILER_DIR = $(HOME)/Code/3rdparty/google-closure-compiler
+CLOSURE_COMPILER_DIR = tools/closure-compiler
 CLOSURE_COMPILER_FLAGS = 
 CLOSURE_COMPILER = java -jar $(CLOSURE_COMPILER_DIR)/compiler.jar
 
