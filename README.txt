@@ -44,6 +44,18 @@ Or just use the minified version of the whole library. It's only about 13 Kb
 (at time of writing), or about 3.6 Kb if you gzip it.
 
 
+Testing
+=======
+
+Open tests/index.html in a browser
+
+If you have a local web server running from the project root, on port 8000
+(for example), then you can navigate to http://localhost:8000/tests/index.html
+instead.
+
+Either way, jsut opening the page will automatically run all the tests.
+
+
 Still to do
 ===========
 
