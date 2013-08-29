@@ -53,7 +53,7 @@ If you have a local web server running from the project root, on port 8000
 (for example), then you can navigate to http://localhost:8000/tests/index.html
 instead.
 
-Either way, jsut opening the page will automatically run all the tests.
+Either way, just opening the page will automatically run all the tests.
 
 
 Still to do
@@ -74,6 +74,4 @@ There's lots! Here's what I'm thinking:
   - SVG
 - Audio mixing support.
 - 2D and 3D positional audio.
-- HUDs
-  - Using HTML only
-  - Generating a texture from a HTLM< <canvas>
+- HUDs, both as HTML overlays and as textures for WebGL.
