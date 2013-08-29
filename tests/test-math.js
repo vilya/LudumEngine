@@ -32,8 +32,15 @@ test("degrees", function () {
 
 
 test("roundTo", function () {
-  equal("1.234", ludum.roundTo(1.23456, 3));
-  equal("1", ludum.roundTo(1.23456, 0));
+  equal("1.234",  ludum.roundTo(1.23432, 3),  "Rounds down when necessary.");
+  equal("1.235",  ludum.roundTo(1.23456, 3),  "Rounds up when necessary.");
+  equal("-1.234", ludum.roundTo(-1.23432, 3), "Rounds negative numbers down when necessary.");
+  equal("-1.235", ludum.roundTo(-1.23456, 3), "Rounds negative numbers up when necessary.");
+  equal("1",      ludum.roundTo(1.23456, 0),  "Produces an int when decimalPlaces = 0.");
+  equal("0.6",    ludum.roundTo(0.55, 1),     "Prefers to round away from zero, not towards odd digits.");
+  equal("0.7",    ludum.roundTo(0.65, 1),     "Prefers to round away from zero, not towards even digits.");
+  equal("-0.6",   ludum.roundTo(-0.55, 1),    "Prefers to round away from zero when negative, not towards even digits.");
+  equal("-0.7",   ludum.roundTo(-0.65, 1),    "Prefers to round away from zero when negative, not towards odd digits.");
 });
 
 
