@@ -49,7 +49,7 @@ ludum.addSymbols(function(){
   StateMachine.prototype = {};
 
 
-  StateMachine.prototype.setContextDefaults(contextDefaults)
+  StateMachine.prototype.setContextDefaults = function (contextDefaults)
   {
     if (!contextDefaults)
       this.contextDefaults = {};
@@ -60,7 +60,7 @@ ludum.addSymbols(function(){
   }
 
 
-  StateMachine.prototype.setInitialState(state)
+  StateMachine.prototype.setInitialState = function (state)
   {
     if (!this._isValidState)
       throw new Error("invalid initial state");
@@ -81,7 +81,7 @@ ludum.addSymbols(function(){
   // - update(ctx, dt) is called regularly while in the state; dt is the time
   //                   delta since the last update.
   // - leave(ctx)      is called when transitioning out of a state.
-  StateMachine.prototype.addState(name, stateTemplate)
+  StateMachine.prototype.addState = function (name, stateTemplate)
   {
     if (this[name] !== undefined)
       throw new Error("name '" + name + "' is already defined");
@@ -114,7 +114,7 @@ ludum.addSymbols(function(){
   // The order in which you add transitions to the fromState defines their
   // precedence. We iterate over them in the order they're added and follow the
   // first one whose condition call returns true.
-  StateMachine.prototype.addTransition(fromState, toState, condition)
+  StateMachine.prototype.addTransition = function (fromState, toState, condition)
   {
     if (!this._isValidState(fromState))
       throw new Error("invalid fromState");
@@ -131,14 +131,14 @@ ludum.addSymbols(function(){
   }
 
 
-  StateMachine.prototype.addAutomaticTransition(fromState, toState)
+  StateMachine.prototype.addAutomaticTransition = function (fromState, toState)
   {
     this.addTransition(fromState, toState, _true);
   }
 
 
   // Create a new executable instance of this state machine.
-  StateMachine.prototype.newContext()
+  StateMachine.prototype.newContext = function ()
   {
     var ctx = {};
     ctx.stateMachine = this;
@@ -175,7 +175,7 @@ ludum.addSymbols(function(){
   StateMachineContext.prototype = {};
 
 
-  StateMachineContext.prototype.update(dt)
+  StateMachineContext.prototype.update = function (dt)
   {
     // If there's a current state, update it (the only time there isn't a
     // current state is when the context hasn't started yet).
@@ -216,7 +216,7 @@ ludum.addSymbols(function(){
   // after the current update call is finished. If you change the state this
   // way it will take precedence over any transitions you've added via the
   // addTransition method.
-  StateMachineContext.prototype.changeState(toState)
+  StateMachineContext.prototype.changeState = function (toState)
   {
     if (!ctx.stateMachine._isValidState(toState))
       throw new Error("attempting to change to invalid state ('" + toState + "')");
