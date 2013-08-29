@@ -134,7 +134,7 @@ ludum.addSymbols(function(){
     // Global state
     'mouse': mouse,
     // Functions
-    'useMouse': useKeyboard,
+    'useMouse': useMouse,
     'anyButtonPressed': anyButtonPressed,
     'isButtonPressed': isButtonPressed
   };
