@@ -62,7 +62,7 @@ ludum.addSymbols(function(){
 
   StateMachine.prototype.setInitialState = function (state)
   {
-    if (!this._isValidState)
+    if (!this.isValidState(state))
       throw new Error("invalid initial state");
     this.initialState = state;
   }
@@ -116,9 +116,9 @@ ludum.addSymbols(function(){
   // first one whose condition call returns true.
   StateMachine.prototype.addTransition = function (fromState, toState, condition)
   {
-    if (!this._isValidState(fromState))
+    if (!this.isValidState(fromState))
       throw new Error("invalid fromState");
-    if (!this._isValidState(toState))
+    if (!this.isValidState(toState))
       throw new Error("invalid toState");
     if (fromState == toState)
       throw new Error("cannot add self-transitions");
