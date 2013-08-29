@@ -77,22 +77,9 @@ test("isValidIdentifier", function () {
 test("require", function () {
   var exceptionThrown;
   
-  try {
-    ludum.require("addSubmodule", "isValidIdentifier");
-    exceptionThrown = false;
-  }
-  catch (ex) {
-    exceptionThrown = true;
-  }
-  ok(!exceptionThrown, "No exception thrown when symbols do exist.");
+  ludum.require("addSubmodule", "isValidIdentifier");
+  ok(true, "No exception thrown when symbols do exist.");
 
   equal(ludum.madeUpSymbol, undefined, "Test symbol doesn't exist before the require call.");
-  try {
-    ludum.require("", "isValidIdentifier");
-    exceptionThrown = false;
-  }
-  catch (ex) {
-    exceptionThrown = true;
-  }
-  ok(exceptionThrown, "Exception is thrown when symbols don't exist.");
+  throws(function () { ludum.require("madeUpSymbol"); }, "Throws when symbols don't exist.");
 });
