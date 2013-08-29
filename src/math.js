@@ -30,15 +30,7 @@ ludum.addSymbols(function(){
 
   function roundTo(value, decimalPlaces)
   {
-    var scale = Math.pow(10, decimalPlaces);
-    var rounded = Math.floor(value * scale) / scale;
-    str = "" + rounded;
-    if (decimalPlaces > 0 && rounded == Math.floor(rounded)) {
-      str += ".";
-      for (var i = 0; i < decimalPlaces; i++)
-        str += 0;
-    }
-    return str;
+    return value.toFixed(decimalPlaces);
   }
 
 
