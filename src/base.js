@@ -80,7 +80,7 @@ var ludum = (function(){
         missingSymbols.push(name);
     }
 
-    if (missingSymbols)
+    if (missingSymbols.length > 0)
       throw new Error("missing symbols " + missingSymbols.join(", "));
   }
 
