@@ -60,7 +60,7 @@ Still to do
 ===========
 
 There's lots! Here's what I'm thinking:
-- Unit tests
+- More unit test coverage.
 - Documentation
 - Geometric data structures (quadtree, octree, BVH, kD-Tree).
 - Scene graph.
