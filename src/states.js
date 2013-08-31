@@ -36,7 +36,7 @@ ludum.addSymbols(function(){
     else if (this.currentState != -1)
       throw new Error("state machine has already started");
     this.nextState = state;
-  };
+  }
 
 
   // Add a new state. This is a setup function for the state machine. Call it
@@ -76,13 +76,13 @@ ludum.addSymbols(function(){
 
     this[name] = this.states.length;
     this.states.push(state);
-  };
+  }
 
 
   StateMachine.prototype.isValidState = function (state)
   {
     return state >= 0 && state < this.states.length;
-  };
+  }
 
 
   StateMachine.prototype.start = function ()
@@ -95,7 +95,7 @@ ludum.addSymbols(function(){
     if (this.logging)
       console.log(this.name + " entering start state '" + stateObj.name + "'");
     stateObj.enter();
-  };
+  }
 
 
   StateMachine.prototype.update = function (dt)
@@ -123,7 +123,7 @@ ludum.addSymbols(function(){
         console.log(this.name + " entering state '" + newStateObj.name + "'");
       newStateObj.enter();
     }
-  };
+  }
 
 
   // Call this from inside the update() method for a state to change the
@@ -139,7 +139,7 @@ ludum.addSymbols(function(){
       throw new Error(this.name + " attempting to change from state '" + currStateObj.name + "' to an invalid state ('" + toState + "')");
     }
     this.nextState = toState;
-  };
+  }
 
 
   // Create a new instance of the state machine by copying the setup from this.
@@ -160,7 +160,7 @@ ludum.addSymbols(function(){
     }
 
     return copiedMachine;
-  };
+  }
 
 
   //
@@ -180,4 +180,5 @@ ludum.addSymbols(function(){
   return {
     'StateMachine': StateMachine
   };
+
 }());
