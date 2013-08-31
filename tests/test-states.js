@@ -35,11 +35,10 @@ test("StateMachine.addState", function () {
   throws(function () { machine.addState('FOO'); },                    "Throws if the state is already defined.");
   throws(function () { machine.addState("invalid state"); },          "Throws if you try to add a state with a name that isn't a valid identifier.");
 
-  machine.addState('BAR', { 'treasures': 10 });
+  machine.addState('BAR');
   equal(machine.states.length, 2, "Second state added.");
   ok(machine.BAR !== undefined, "A constant for the new state has been added to the state machine.");
   equal(machine.states[machine.BAR].name, 'BAR', "State added with the correct name.");
-  equal(machine.states[machine.BAR].userData.treasures, 10, "User data copied set correctly.");
 });
 
 
@@ -65,7 +64,7 @@ test("StateMachine.start", function () {
   expect(3); 
 
   var machine = new ludum.StateMachine("Foobar");
-  machine.addState("FOO", null, {
+  machine.addState("FOO", {
     'enter': function () {
       ok(true, "machine.start() calls the enter method of the initial state.");
     },
@@ -91,12 +90,12 @@ test("StateMachine.update", function () {
 
   var sequence = 0;
   var machine = new ludum.StateMachine("Foobar");
-  machine.addState("FOO", null, {
+  machine.addState("FOO", {
     'enter':  function ()   { equal(sequence++, 0, "FOO.enter() called."); },
     'update': function (dt) { equal(sequence++, 1, "FOO.update() called."); machine.changeState(machine.BAR); },
     'leave': function ()    { equal(sequence++, 2, "FOO.leave() called."); }
   });
-  machine.addState("BAR", null, {
+  machine.addState("BAR", {
     'enter':  function ()   { equal(sequence++, 3, "BAR.enter() called."); },
     'update': function (dt) { equal(sequence++, 4, "BAR.update() called."); },
     'leave': function ()    { ok(false, "BAR.leave() shouldn't get called."); }
