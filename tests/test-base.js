@@ -45,7 +45,7 @@ test("addSymbols", function () {
       allSymbolsEqual = false;
   }
 
-  ok(allSymbolsAdded, "All symbols from exampleModule added to ludum namespace.")
+  ok(allSymbolsAdded, "All symbols from exampleModule added to ludum namespace.");
   ok(allSymbolsEqual, "All symbols from exampleModule have the same value in the ludum namespace.");
 });
 
