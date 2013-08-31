@@ -5,71 +5,43 @@ if (!ludum)
 ludum.addSymbols(function(){
  
   //
-  // Constants
-  //
-
-  var _STANDARD_STATE_VARS = {
-    'name': null,
-    'transitions': []
-  };
-
-  var _STANDARD_CONTEXT_VARS = {
-    'stateMachine': null,
-    'currentState': -1,
-    'nextState': -1
-  };
-
-
-  //
   // StateMachine class
   //
-  // This is a static description of a state machine, without any runtime
-  // state. It describes the states and how/when to transition between them.
-  // The idea is that you create one of these then multiple instances of it,
-  // e.g. for NPC logic.
+  // This is an executable state machine. If you need multiple instances of the
+  // same state machine (e.g. for NPC behaviour), you should set up a clean
+  // instance then manufacture new instances by cloning from it.
   //
   // Note that the first state you add is assumed to be the starting state,
   // unless you call setInitialState to tell it otherwise.
 
-  function StateMachine(contextDefaults)
+  function StateMachine(name, userData)
   {
-    this.states = [];
-    this.initialState = 0;
-    this.logStateChanges = false;
+    this.name = name;
+    this.userData = userData;
+    this.logging = false;
 
-    if (!contextDefaults)
-      this.contextDefaults = {};
-    else if (ludum.hasNameClashes(_STANDARD_CONTEXT_VARS, contextDefaults))
-      throw new Error('symbols in contextDefaults clash with standard context variable names');
-    else
-      this.contextDefaults = contextDefaults;
+    this.states = [];
+    this.currentState = -1;
+    this.nextState = 0;
   }
 
 
   StateMachine.prototype = {};
 
 
-  StateMachine.prototype.setContextDefaults = function (contextDefaults)
-  {
-    if (!contextDefaults)
-      this.contextDefaults = {};
-    else if (ludum.hasNameClashes(_STANDARD_CONTEXT_VARS, contextDefaults))
-      throw new Error('symbols in contextDefaults clash with standard context variable names');
-    else
-      this.contextDefaults = contextDefaults;
-  }
-
-
   StateMachine.prototype.setInitialState = function (state)
   {
     if (!this.isValidState(state))
       throw new Error("invalid initial state");
-    this.initialState = state;
-  }
+    else if (this.currentState != -1)
+      throw new Error("state machine has already started");
+    this.nextState = state;
+  };
 
 
   // Add a new state. This is a setup function for the state machine. Call it
-  // to add all of the possible states for the state machine.
+  // repeatedly until you've added all of the possible states for the state
+  // machine.
   //
   // This will add a constant to the state machine object which maps the state
   // name to an id, so after calling machine.addState('FOO') you can refer to
@@ -77,151 +49,120 @@ ludum.addSymbols(function(){
   //
   // The state template can define functions that the state machine will call
   // automatically:
-  // - enter(ctx)      is called when transitioning into a state.
-  // - update(ctx, dt) is called regularly while in the state; dt is the time
+  //
+  // - enter()      is called when transitioning into a state.
+  // - update(dt)   is called regularly while in the state; dt is the time
   //                   delta since the last update.
-  // - leave(ctx)      is called when transitioning out of a state.
-  StateMachine.prototype.addState = function (name, stateTemplate)
+  // - leave()      is called when transitioning out of a state.
+  StateMachine.prototype.addState = function (name, userData, kwargs)
   {
     if (this[name] !== undefined)
-      throw new Error("name '" + name + "' is already defined");
+      throw new Error("state '" + name + "' already exists");
     if (!ludum.isValidIdentifier(name))
-      throw new Error("invalid state name '" + name + "'");
-    if (ludum.hasNameClashes(_STANDARD_STATE_VARS, stateTemplate))
-      throw new Error('symbols in stateTemplate clash with standard state variable names');
+      throw new Error("'" + name + "' is not a valid identifier");
 
-    var state = {
-      'name': name,
-      'transitions': []
-    };
-    ludum.copySymbols(stateTemplate, state);
-    state.enter = state.enter || _noop;
-    state.update = state.update || _noop;
-    state.leave = state.leave || _noop;
+    var state = {};
+    state.name = name;
+    state.userData = userData;
+    if (kwargs) {
+      state.enter = kwargs.enter || _noop;
+      state.update = kwargs.update || _noop;
+      state.leave = kwargs.leave || _noop;
+    }
+    else {
+      state.enter = _noop;
+      state.update = _noop;
+      state.leave = _noop;
+    }
 
     this[name] = this.states.length;
     this.states.push(state);
-  }
-
-
-  // Add a transition from one state to another. The transition has a condition
-  // which we check to determine whether we should follow it or not.
-  //
-  // 'condition(ctx)' is a callable function which returns true when the
-  // condition is met. This will be called very frequently, so it should be as
-  // fast as possible.
-  //
-  // The order in which you add transitions to the fromState defines their
-  // precedence. We iterate over them in the order they're added and follow the
-  // first one whose condition call returns true.
-  StateMachine.prototype.addTransition = function (fromState, toState, condition)
-  {
-    if (!this.isValidState(fromState))
-      throw new Error("invalid fromState");
-    if (!this.isValidState(toState))
-      throw new Error("invalid toState");
-    if (fromState == toState)
-      throw new Error("cannot add self-transitions");
-
-    var transition = {
-      'condition': condition,
-      'toState': toState
-    };
-    this.states[fromState].transitions.push(transition);
-  }
-
-
-  StateMachine.prototype.addAutomaticTransition = function (fromState, toState)
-  {
-    this.addTransition(fromState, toState, _true);
-  }
-
-
-  // Create a new executable instance of this state machine.
-  StateMachine.prototype.newContext = function ()
-  {
-    var ctx = {};
-    ctx.stateMachine = this;
-    ctx.currentState = -1;
-    ctx.nextState = this.initialState;
-    if (this.contextDefaults)
-      ludum.copySymbols(this.contextDefaults, ctx);
-
-    return ctx;
-  }
+  };
 
 
   StateMachine.prototype.isValidState = function (state)
   {
     return state >= 0 && state < this.states.length;
-  }
+  };
 
 
-  //
-  // StateMachineContext class
-  //
-
-  function StateMachineContext(stateMachine)
+  StateMachine.prototype.start = function ()
   {
-    this.stateMachine = stateMachine;
-    this.currentState = -1;
-    this.nextState = stateMachine.initialState;
+    // Change the current state.
+    this.currentState = this.nextState;
 
-    if (this.stateMachine.contextDefaults)
-      ludum.copySymbols(this.stateMachine.contextDefaults, this);
-  }
+    // Enter the new state.
+    var stateObj = this.states[this.currentState];
+    if (this.logging)
+      console.log(this.name + " entering start state '" + stateObj.name + "'");
+    stateObj.enter();
+  };
 
 
-  StateMachineContext.prototype = {};
-
-
-  StateMachineContext.prototype.update = function (dt)
+  StateMachine.prototype.update = function (dt)
   {
-    // If there's a current state, update it (the only time there isn't a
-    // current state is when the context hasn't started yet).
-    if (this.currentState != -1)
-      this.stateMachine.states[this.currentState].update(this, dt);
+    var stateObj = this.states[this.currentState];
 
-    // Check whether we're transitioning.
-    if (this.nextState == this.currentState) {
-      var stateObj = this.stateMachine.states[this.currentState];
-      for (var i = 0, end = stateObj.transitions.length; i < end && this.nextState == this.currentState; ++i) {
-        if (stateObj.transitions[i].condition(this))
-          this.nextState = stateObj.transitions[i].toState;
-      }
-    }
+    // Update the current state. This may set the nextState attribute as a
+    // side-effect.
+    stateObj.update(dt);
 
-    // If we are transitioning.
+    // If the update caused a transition, handle that now.
     if (this.nextState != this.currentState) {
-      // Leave the current state, if there is one.
-      if (this.currentState != -1) {
-        var oldStateObj = this.stateMachine.states[this.currentState];
-        if (this.stateMachine.logStateChanges)
-          console.log("leaving state '" + oldStateObj.name + "'");
-        oldStateObj.leave(this);
-      }
+      // Leave the current state.
+      var oldStateObj = this.states[this.currentState];
+      if (this.logging)
+        console.log(this.name + " leaving state '" + oldStateObj.name + "'");
+      oldStateObj.leave();
 
       // Change the current state.
       this.currentState = this.nextState;
 
       // Enter the new state.
-      var newStateObj = this.stateMachine.states[this.currentState];
-      newStateObj.enter(this);
+      var newStateObj = this.states[this.currentState];
+      if (this.logging)
+        console.log(this.name + " entering state '" + newStateObj.name + "'");
+      newStateObj.enter();
     }
-  }
+  };
 
 
-  // Call this from inside the update(ctx) method for a state to change the
-  // context into a new state. Note that the state change doesn't happen until
-  // after the current update call is finished. If you change the state this
-  // way it will take precedence over any transitions you've added via the
-  // addTransition method.
-  StateMachineContext.prototype.changeState = function (toState)
+  // Call this from inside the update() method for a state to change the
+  // context into a new state.
+  //
+  // Note that the state change doesn't happen until after the current update
+  // call is finished, so if you call this multiple times only the last one
+  // will have any effect.
+  StateMachine.prototype.changeState = function (toState)
   {
-    if (!ctx.stateMachine._isValidState(toState))
-      throw new Error("attempting to change to invalid state ('" + toState + "')");
-    ctx.nextState = toState;
-  }
+    if (!this.isValidState(toState)) {
+      var currStateObj = this.states[this.currentState];
+      throw new Error(this.name + " attempting to change from state '" + currStateObj.name + "' to an invalid state ('" + toState + "')");
+    }
+    this.nextState = toState;
+  };
+
+
+  // Create a new instance of the state machine by copying the setup from this.
+  StateMachine.prototype.newInstance = function ()
+  {
+    var copiedUserData = (this.userData ? JSON.parse(JSON.stringify(this.userData)) : this.userData);
+
+    var copiedMachine = new StateMachine(this.name, copiedUserData);
+    copiedMachine.logging = this.logging;
+
+    for (var i = 0, endI = this.states.length; i < endI; ++i) {
+      var srcState = this.states[i];
+      var copiedStateUserData = (srcState.userData ? JSON.parse(JSON.stringify(srcState.userData)) : srcState.userData); 
+      copiedMachine.addState(srcState.name, copiedStateUserData, {
+        'enter': srcState.enter,
+        'update': srcState.update,
+        'leave': srcState.leave
+      });
+    }
+
+    return copiedMachine;
+  };
 
 
   //
@@ -231,12 +172,6 @@ ludum.addSymbols(function(){
   function _noop()
   {
     // Do nothing.
-  }
-
-
-  function _true()
-  {
-    return true;
   }
 
 
