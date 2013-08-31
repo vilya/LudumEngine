@@ -16,8 +16,17 @@ SRCS = \
   src/math.js \
   src/mouse.js
 
+TEST_SRCS = \
+  tests/test-base.js \
+  tests/test-math.js \
+  tests/test-states.js \
+  tests/intersections/test-raybox.js
 
-all: dirs build/ludum.min.js
+
+# Note here that we don't build a minified version of test-ludum.js. It's
+# because the Closure Compiler chokes on QUnit's throws() function, saying it's
+# a reserved word
+all: dirs build/ludum.js build/ludum.min.js build/test-ludum.js
 
 
 .PHONY: dirs
@@ -28,9 +37,11 @@ dirs:
 build/ludum.min.js: $(SRCS)
 	$(CLOSURE_COMPILER) --js_output_file $@ $^
 
-
 build/ludum.js: $(SRCS)
-	cat $(SRCS) > $@
+	cat $^ > $@
+
+build/test-ludum.js: $(TEST_SRCS)
+	cat $^ > $@
 
 
 clean:
