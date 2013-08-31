@@ -54,7 +54,7 @@ ludum.addSymbols(function(){
   // - update(dt)   is called regularly while in the state; dt is the time
   //                   delta since the last update.
   // - leave()      is called when transitioning out of a state.
-  StateMachine.prototype.addState = function (name, userData, kwargs)
+  StateMachine.prototype.addState = function (name, kwargs)
   {
     if (this[name] !== undefined)
       throw new Error("state '" + name + "' already exists");
@@ -63,7 +63,6 @@ ludum.addSymbols(function(){
 
     var state = {};
     state.name = name;
-    state.userData = userData;
     if (kwargs) {
       state.enter = kwargs.enter || _noop;
       state.update = kwargs.update || _noop;
@@ -153,8 +152,7 @@ ludum.addSymbols(function(){
 
     for (var i = 0, endI = this.states.length; i < endI; ++i) {
       var srcState = this.states[i];
-      var copiedStateUserData = (srcState.userData ? JSON.parse(JSON.stringify(srcState.userData)) : srcState.userData); 
-      copiedMachine.addState(srcState.name, copiedStateUserData, {
+      copiedMachine.addState(srcState.name, {
         'enter': srcState.enter,
         'update': srcState.update,
         'leave': srcState.leave
