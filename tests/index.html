@@ -11,7 +11,9 @@
   <script src="qunit-1.12.0.js"></script>
   <!-- Libraries that ludum.js depends on. -->
   <script src="../lib/gl-matrix.js"></script>
-  <!-- The ludum.js files to  be tested. -->
+  <!-- The ludum.js files to be tested. Listing each of the sources
+       individually instead of just including ludum.js, so that test failures
+       give us useful file name and line number info. -->
   <script src="../src/base.js"></script>
   <script src="../src/states.js"></script>
   <script src="../src/browser.js"></script>
