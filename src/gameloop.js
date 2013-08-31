@@ -11,49 +11,32 @@ ludum.addSymbols(function(){
   // Global variables
   //
 
-  var game = new ludum.StateMachine({
+  // The state machine which runs the game as a whole. Add all the necessary
+  // states to this then call the startGame() function to launch into the main
+  // game loop. The game loop will automatically call game.update(dt) on each
+  // iteration (with a correct value for dt).
+  var game = new ludum.StateMachine("Game", {
     'gameT': 0.0,   // Current global time, in seconds since the start of the epoch (NOT milliseconds).
     'stateT': 0.0,  // Time we've been in the current state for, in seconds.
     'enterT': 0.0   // Time at which we entered the current state (a saved copy of gameT from then).
   });
-
-  var gameCtx = null;
 
 
   //
   // Functions
   //
 
-  function addGameState(name, stateTemplate)
-  {
-    game.addState(name, stateTemplate);
-  }
-
-
-  function addGameTransition(fromState, toState, condition)
-  {
-    game.addTransition(fromState, toState, condition);
-  }
-
-
-  function addAutomaticGameTransition(fromState, toState)
-  {
-    game.addAutomaticTransition(fromState, toState);
-  }
-
-
+  // Call this to start the main game loop. Make sure you've configured the
+  // game state machine first though!
   function startGame()
   {
-    // Create the context for the game state machine.
-    gameCtx = game.newContext();
-
     // Set the game context variables.
-    gameCtx.gameT = Date.now() / 1000.0;
-    gameCtx.stateT = 0.0;
-    gameCtx.enterT = gameCtx.gameT;
+    game.userData.gameT = Date.now() / 1000.0;
+    game.userData.stateT = 0.0;
+    game.userData.enterT = game.userData.gameT;
 
     // Start the game state machine.
-    gameCtx.update(0);
+    game.start();
 
     // Launch into the main loop.
     _mainLoop();
@@ -68,20 +51,20 @@ ludum.addSymbols(function(){
   {
     requestAnimFrame(_mainLoop);
 
-    var stateObj = game.states[gameCtx.currentState];
+    var stateObj = game.states[game.currentState];
     if (stateObj.draw)
-      stateObj.draw(gameCtx);
+      stateObj.draw();
 
     var t = Date.now() / 1000.0;
-    var dt = t - gameCtx.gameT;
-    gameCtx.gameT = t;
-    gameCtx.stateT = t - gameCtx.enterT;
+    var dt = t - game.userData.gameT;
+    game.userData.gameT = t;
+    game.userData.stateT = t - game.userData.enterT;
 
-    var oldState = gameCtx.currentState;
-    gameCtx.update(dt);
-    var newState = gameCtx.currentState;
+    var oldState = game.currentState;
+    game.update(dt);
+    var newState = game.currentState;
     if (newState != oldState)
-      gameCtx.enterT = t;
+      game.userData.enterT = t;
   }
 
 
@@ -91,9 +74,6 @@ ludum.addSymbols(function(){
 
   return {
     'game': game,
-    'addGameState': addGameState,
-    'addGameTransition': addGameTransition,
-    'addAutomaticGameTransition': addAutomaticGameTransition,
     'startGame': startGame
   };
 
