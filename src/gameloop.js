@@ -51,15 +51,19 @@ ludum.addSymbols(function(){
   {
     requestAnimFrame(_mainLoop);
 
+    // Draw the current state.
     var stateObj = game.states[game.currentState];
     if (stateObj.draw)
       stateObj.draw();
 
+    // Figure out how much time has passed since the last update.
     var t = Date.now() / 1000.0;
     var dt = t - game.userData.gameT;
     game.userData.gameT = t;
     game.userData.stateT = t - game.userData.enterT;
 
+    // Update the current state. If that results in the game entering a new
+    // state, record the time at which we entered the state.
     var oldState = game.currentState;
     game.update(dt);
     var newState = game.currentState;
