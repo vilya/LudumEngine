@@ -20,7 +20,8 @@ TEST_SRCS = \
   tests/test-base.js \
   tests/test-math.js \
   tests/test-states.js \
-  tests/intersections/test-raybox.js
+  tests/intersections/test-raybox.js \
+  tests/intersections/test-raysphere.js
 
 
 # Note here that we don't build a minified version of test-ludum.js. It's
