@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>LudumEngine Unit Tests</title>
+  <link rel="stylesheet" href="qunit-1.12.0.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="qunit-1.12.0.js"></script>
+  <!-- Libraries that ludum.js depends on. -->
+  <script src="../lib/gl-matrix.js"></script>
+  <!-- The ludum.js files to be tested. Listing each of the sources
+       individually instead of just including ludum.js, so that test failures
+       give us useful file name and line number info. -->
+  <script src="../src/base.js"></script>
+  <script src="../src/states.js"></script>
+  <script src="../src/browser.js"></script>
+  <script src="../src/gameloop.js"></script>
+  <script src="../src/keyboard.js"></script>
+  <script src="../src/loader.js"></script>
+  <script src="../src/math.js"></script>
+  <script src="../src/mouse.js"></script>
+  <script src="../src/intersections/raybox.js"></script>
+  <script src="../src/intersections/raysphere.js"></script>
+  <!-- The tests. -->
+  <script src="test-base.js"></script>
+  <script src="test-states.js"></script>
+  <script src="test-math.js"></script>
+  <script src="intersections/test-raybox.js"></script>
+  <script src="intersections/test-raysphere.js"></script>
+</body>
+</html>
