@@ -46,7 +46,7 @@ test("ray pointing at origin", function () {
   raybox.setRaySrc(0, 0, -10);
   raybox.setRayDir(0, 0, 1);
   ok(raybox.shadowIntersect(0, 100), "Ray from z = -10 hits box.");
-  equal(raybox.intersect(0, 100), 9, "Ray hits z = -10 hits box at a distance of 9 units.");
+  equal(raybox.intersect(0, 100), 9, "Ray from z = -10 hits box at a distance of 9 units.");
   ok(!raybox.shadowIntersect(0, 5),  "Ray from z = -10 doesn't hit box when tMax is less than 9.");
 
   raybox.setRaySrc(10, 0, 0);
