@@ -29,6 +29,17 @@ ludum.addSymbols(function(){
   StateMachine.prototype = {};
 
 
+  // Set the state that this state machine will enter when its 'start()' method
+  // gets called. The initial state defaults to 0, which will be whatever state
+  // you added first; you only need to call this if you want the starting state
+  // to be something other than 0.
+  //
+  // You can't set the initial state to a state that you haven't added yet,
+  // because we check to ensure that you're passing in a valid state index. As
+  // a general rule you should only after you've finished adding all the states.
+  //
+  // It is not valid to call this method on a state machine after its 'start()'
+  // method has been called. Doing so will cause an exception.
   StateMachine.prototype.setInitialState = function (state)
   {
     if (!this.isValidState(state))
@@ -79,12 +90,30 @@ ludum.addSymbols(function(){
   }
 
 
+  // Check whether the integer 'state' is a valid state index.
   StateMachine.prototype.isValidState = function (state)
   {
     return state >= 0 && state < this.states.length;
   }
 
 
+  // Begin executing the state machine.
+  //
+  // This changes the state machine into its initial state. It calls the
+  // 'enter()' function for the initial state, if any, but does not call
+  // 'update()'.
+  //
+  // You must call this on your state machine instance before making any
+  // update() calls on it.
+  //
+  // Prior to this call the 'currentState' member will be some invalid value;
+  // the 'nextState' member will hold the index of the initial state.
+  //
+  // After this method has been called the userData member may have been
+  // changed from its initial state. If so any calls to newInstance() will
+  // create a new state machine with a copy of the *modified* userData. If this
+  // is not what you want, make sure you call newInstance() *before* this
+  // method.
   StateMachine.prototype.start = function ()
   {
     // Change the current state.
@@ -98,6 +127,15 @@ ludum.addSymbols(function(){
   }
 
 
+  // Update the state machine. This calls the 'update()' function for the
+  // current state and handles any resulting request for a state change.
+  //
+  // A state change is signalled by the 'nextState' member having a different
+  // value to the 'currentState' member. Any state change is handled after the
+  // 'update()' call completes, as follows:
+  // - Call the 'leave()' function for the current state.
+  // - Set the 'currentState' member to the 'nextState' value.
+  // - Call the 'enter' function for the new state.
   StateMachine.prototype.update = function (dt)
   {
     var stateObj = this.states[this.currentState];
@@ -143,6 +181,17 @@ ludum.addSymbols(function(){
 
 
   // Create a new instance of the state machine by copying the setup from this.
+  //
+  // The new state machine will have the same set of states and state methods
+  // as the instance it was copied from. It will be left unstarted, so you
+  // must call the 'start()' method yourself, regardless of whether the
+  // instance it was copied from had been started.
+  //
+  // The 'userData' member will be copied over verbatim, even if it has changed
+  // from its initial values. This will probably not be what you want, so for
+  // any state machine that you expect to have multiple instances of, you should
+  // create a clean instance which you never call start() on and create all
+  // other instances by copying from it.
   StateMachine.prototype.newInstance = function ()
   {
     var copiedUserData = (this.userData ? JSON.parse(JSON.stringify(this.userData)) : this.userData);
@@ -167,6 +216,9 @@ ludum.addSymbols(function(){
   // Helper functions
   //
 
+  // Helper function which does nothing. We use this as a stub for undefined
+  // state functions, so that we don't need to have checks before every call to
+  // one of them.
   function _noop()
   {
     // Do nothing.
