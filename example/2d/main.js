@@ -116,7 +116,7 @@ var example2d = function () {
     {
       var targetStates = [
         ludum.game.LOADING,
-        ludum.game.LOADING,
+        ludum.game.SETTINGS,
         ludum.game.LOADING,
         ludum.game.LOADING
       ];
@@ -137,7 +137,77 @@ var example2d = function () {
         ++menuOptionChange;
   
       if (menuOptionChange !== 0) {
-        menuOption = ludum.clamp(menuOption + menuOptionChange, 0, targetStates.length - 1);
+        menuOption += menuOptionChange;
+        if (menuOption < 0)
+          menuOption += targetStates.length;
+        else if (menuOption >= targetStates.length)
+          menuOption -= targetStates.length;
+        ludum.clearKeyboard();
+      }
+    },
+  };
+
+
+  //
+  // Settings menu state
+  //
+
+  var settingsFuncs = {
+    // Reset the menu to the default state.
+    'enter': function ()
+    {
+      settingsMenuOption = 0;
+    },
+
+
+    'draw': function ()
+    {
+      clearScreen("#AAAAAA");
+      drawMenu(settingsMenuOption,
+        "Controls",
+        "Video",
+        "Audio",
+        "Back to main menu"
+      );
+    },
+
+
+    'update': function (dt)
+    {
+      var targetStates = [
+        ludum.game.SETTINGS,
+        ludum.game.SETTINGS,
+        ludum.game.SETTINGS,
+        ludum.game.MENU,
+      ];
+
+      // If the player is pressing space or enter, accept the current menu
+      // option.
+      if (ludum.isKeyPressed(ludum.keycodes.ENTER) || ludum.isKeyPressed(ludum.keycodes.SPACE)) {
+        ludum.clearKeyboard();
+        ludum.game.changeState(targetStates[settingsMenuOption]);
+        return;
+      }
+
+      // If the player is pressing escape, take them back to the main menu.
+      if (ludum.isKeyPressed(ludum.keycodes.ESCAPE)) {
+        ludum.clearKeyboard();
+        ludum.game.changeState(ludum.game.MENU);
+      }
+ 
+      // If the player is pressing UP or DOWN, change the selected menu option.
+      var menuOptionChange = 0;
+      if (ludum.isKeyPressed(ludum.keycodes.UP))
+        --menuOptionChange;
+      if (ludum.isKeyPressed(ludum.keycodes.DOWN))
+        ++menuOptionChange;
+  
+      if (menuOptionChange !== 0) {
+        settingsMenuOption += menuOptionChange;
+        if (settingsMenuOption < 0)
+          settingsMenuOption += targetStates.length;
+        else if (settingsMenuOption >= targetStates.length)
+          settingsMenuOption -= targetStates.length;
         ludum.clearKeyboard();
       }
     },
@@ -216,9 +286,9 @@ var example2d = function () {
 
     ludum.game.addState('LOADING', loadingFuncs);
     ludum.game.addState('MENU', menuFuncs);
-    //ludum.game.addState('SETTINGS', settingsFuncs);
+    ludum.game.addState('SETTINGS', settingsFuncs);
     //ludum.game.addState('PLAYING', playingFuncs);
-    //ludum.game.addState('PAUSED', playingFuncs);
+    //ludum.game.addState('PAUSED', pausedFuncs);
     //ludum.game.addState('WIN', winFuncs);
     //ludum.game.addState('LOSE', loseFuncs);
     //ludum.game.addState('HIGHSCORES', highScoresFuncs);
