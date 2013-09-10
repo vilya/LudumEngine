@@ -14,12 +14,14 @@ var example2d = function () {
     'loadingText':        "#997777",
     'menuSelectedText':   "#997777",
     'menuUnselectedText': "#990000",
+    'countdown':          "#990000",
   };
 
   var FONTS = {
     'loadingText':        "24px SansSerif",
     'menuSelectedText':   "56px SansSerif",
     'menuUnselectedText': "48px SansSerif",
+    'countdown':          "64px SansSerif",
   };
 
   var MENU_ACTIONS = {
@@ -76,7 +78,7 @@ var example2d = function () {
     'draw': function ()
     {
       //var progress = loader.fractionComplete();
-      var progress = ludum.game.userData.stateT / 5.0;
+      var progress = ludum.game.userData.stateT / 3.0;
 
       clearScreen(COLORS.background);
 
@@ -109,7 +111,7 @@ var example2d = function () {
     'update': function (dt)
     {
       //var progress = loader.fractionComplete();
-      var progress = ludum.game.userData.stateT / 5.0;
+      var progress = ludum.game.userData.stateT / 3.0;
       if (progress >= 1.0)
         ludum.game.changeState(ludum.game.MENU);
     },
@@ -131,7 +133,7 @@ var example2d = function () {
     // Reset the menu to the default state.
     'enter': function ()
     {
-      menuOption = 0;
+      menu.reset();
     },
 
 
@@ -146,8 +148,7 @@ var example2d = function () {
     // Handle keystrokes and mouse clicks.
     'update': function (dt)
     {
-      // If the player is pressing space or enter, accept the current menu
-      // option.
+      // Space or Enter accepts the currently selected menu option.
       if (ludum.isKeyPressed(ludum.keycodes.ENTER) || ludum.isKeyPressed(ludum.keycodes.SPACE)) {
         var action = menu.selectedItem().action;
         switch (action) {
@@ -158,7 +159,7 @@ var example2d = function () {
           menu.leaveSubmenu();
           break;
         case MENU_ACTIONS.playGame:
-          ludum.game.changeState(ludum.game.PLAYING);
+          ludum.game.changeState(ludum.game.STARTING_GAME);
           break;
         case MENU_ACTIONS.restart:
           ludum.game.changeState(ludum.game.LOADING);
@@ -170,8 +171,15 @@ var example2d = function () {
         ludum.clearKeyboard();
         return;
       }
- 
-      // If the player is pressing UP or DOWN, change the selected menu option.
+
+      // Escape takes you back up one level in the menu.
+      if (ludum.isKeyPressed(ludum.keycodes.ESCAPE)) {
+        menu.leaveSubmenu();
+        ludum.clearKeyboard();
+        return;
+      }
+
+      // If the player is pressing Up or Down, change the selected menu option.
       if (ludum.isKeyPressed(ludum.keycodes.UP)) {
         menu.moveSelectedIndex(-1);
         ludum.clearKeyboard();
@@ -181,6 +189,46 @@ var example2d = function () {
         ludum.clearKeyboard();
       }
     },
+  };
+
+
+  //
+  // Starting Game state
+  //
+
+  var startingGameFuncs = {
+    'draw': function ()
+    {
+      clearScreen(COLORS.background);
+
+      var msg = ludum.roundTo(Math.ceil(3.0 - ludum.game.userData.stateT), 0);
+
+      ctx.font = FONTS.countdown;
+      ctx.fillStyle = COLORS.countdown;
+
+      // Draw the countdown.
+      var w = ctx.measureText(msg).width;
+      var h = 64;
+      var x = (canvas.width - w) / 2.0;
+      var y = (canvas.height - h) / 2.0;
+      ctx.fillText(msg, x, y);
+    },
+
+
+    'update': function (dt)
+    {
+      var t = ludum.game.userData.stateT;
+      if (t >= 3.0) {
+        ludum.game.changeState(ludum.game.PLAYING);
+        return;
+      }
+
+      // If the player is pressing escape, take them back to the main menu.
+      if (ludum.isKeyPressed(ludum.keycodes.ESCAPE)) {
+        ludum.clearKeyboard();
+        ludum.game.changeState(ludum.game.MENU);
+      }
+    }
   };
 
 
@@ -291,6 +339,7 @@ var example2d = function () {
 
     ludum.game.addState('LOADING', loadingFuncs);
     ludum.game.addState('MENU', menuFuncs);
+    ludum.game.addState('STARTING_GAME', startingGameFuncs);
     ludum.game.addState('PLAYING', playingFuncs);
     //ludum.game.addState('PAUSED', pausedFuncs);
     //ludum.game.addState('WIN', winFuncs);
