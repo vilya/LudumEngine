@@ -72,6 +72,12 @@ ludum.addSymbols(function(){
   }
 
 
+  Menu.prototype.reset = function ()
+  {
+    this.selection = [0];
+  }
+
+
   //
   // MenuItem class
   //
