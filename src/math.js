@@ -51,6 +51,22 @@ ludum.addSymbols(function(){
   }
 
 
+  // Similar to the '%' operator, but with different behaviour for negative
+  // numbers: negative numbers wrap around to the end of the range with this
+  // function, whereas the % operator effectively returns -((-x) % y) when x is
+  // negative. For positive numbers, the behaviour is the same as '%'.
+  //
+  // Note that, just like the '%' operator in javascript, we always use the
+  // absolute value of 'y'.
+  function wrap(x, y)
+  {
+    var result = x % y;
+    if (result < 0)
+      result += Math.abs(y);
+    return result;
+  }
+
+
   //
   // Export public symbols
   //
@@ -60,7 +76,8 @@ ludum.addSymbols(function(){
     'degrees': degrees,
     'roundTo': roundTo,
     'clamp': clamp,
-    'saturate': saturate
+    'saturate': saturate,
+    'wrap': wrap
   };
 
 }());
