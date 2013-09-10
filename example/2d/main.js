@@ -26,8 +26,10 @@ var example2d = function () {
     'ignore':       0,
     'enterSubmenu': 1,
     'leaveSubmenu': 2,
-    'playGame':     3.
+    'playGame':     3,
+    'restart':      4,
   };
+
 
   //
   // Global variables
@@ -46,7 +48,8 @@ var example2d = function () {
       new ludum.MenuItem("Back to main menu", MENU_ACTIONS.leaveSubmenu)
     ),
     new ludum.MenuItem("High scores", MENU_ACTIONS.ignore),
-    new ludum.MenuItem("Credits", MENU_ACTIONS.ignore)
+    new ludum.MenuItem("Credits", MENU_ACTIONS.ignore),
+    new ludum.MenuItem("Restart", MENU_ACTIONS.restart)
   ));
 
 
@@ -156,6 +159,9 @@ var example2d = function () {
           break;
         case MENU_ACTIONS.playGame:
           ludum.game.changeState(ludum.game.PLAYING);
+          break;
+        case MENU_ACTIONS.restart:
+          ludum.game.changeState(ludum.game.LOADING);
           break;
         default:
           break;
