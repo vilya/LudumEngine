@@ -14,6 +14,7 @@ SRCS = \
   src/keyboard.js \
   src/loader.js \
   src/math.js \
+  src/menu.js \
   src/mouse.js
 
 TEST_SRCS = \
