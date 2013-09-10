@@ -72,18 +72,11 @@ ludum.addSymbols(function(){
     if (!ludum.isValidIdentifier(name))
       throw new Error("'" + name + "' is not a valid identifier");
 
-    var state = {};
+    var state = (kwargs !== undefined && kwargs !== null) ? kwargs : null;
     state.name = name;
-    if (kwargs) {
-      state.enter = kwargs.enter || _noop;
-      state.update = kwargs.update || _noop;
-      state.leave = kwargs.leave || _noop;
-    }
-    else {
-      state.enter = _noop;
-      state.update = _noop;
-      state.leave = _noop;
-    }
+    state.enter = state.enter || _noop;
+    state.update = state.update || _noop;
+    state.leave = state.leave || _noop;
 
     this[name] = this.states.length;
     this.states.push(state);
