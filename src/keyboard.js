@@ -40,14 +40,14 @@ ludum.addSymbols(function(){
 
   function clearKeyboard()
   {
-    for (k in keysDown)
+    for (var k in keysDown)
       keysDown[k] = false;
   }
 
 
   function anyKeyPressed()
   {
-    for (k in keysDown) {
+    for (var k in keysDown) {
       if (keysDown[k])
         return true;
     }
@@ -67,15 +67,15 @@ ludum.addSymbols(function(){
 
   function _keyDown(event)
   {
-    globals.keysDown[event.keyCode] = true;
-    globals.keysDown[String.fromCharCode(event.keyCode)] = true;
+    keysDown[event.keyCode] = true;
+    keysDown[String.fromCharCode(event.keyCode)] = true;
   }
   
   
   function _keyUp(event)
   {
-    globals.keysDown[event.keyCode] = false;
-    globals.keysDown[String.fromCharCode(event.keyCode)] = false;
+    keysDown[event.keyCode] = false;
+    keysDown[String.fromCharCode(event.keyCode)] = false;
   }
 
 
