@@ -60,8 +60,11 @@ Still to do
 ===========
 
 There's lots! Here's what I'm thinking:
-- More unit test coverage.
-- Documentation
+
+- Convert the inline documentation to jsdoc format & set up a make rule for doc
+  generation.
+- Write more high-level documentation.
+- A complete, working, example game.
 - Geometric data structures (quadtree, octree, BVH, kD-Tree).
 - Scene graph.
 - More intersection tests.
