@@ -5,6 +5,25 @@ if (!ludum)
 var example2d = function () {
 
   //
+  // Constants
+  //
+
+  var COLORS = {
+    'background':         "#222222",
+    'loadingBar':         "#990000",
+    'loadingText':        "#997777",
+    'menuSelectedText':   "#997777",
+    'menuUnselectedText': "#990000",
+  };
+
+  var FONTS = {
+    'loadingText':        "24px SansSerif",
+    'menuSelectedText':   "56px SansSerif",
+    'menuUnselectedText': "48px SansSerif",
+  };
+
+
+  //
   // Global variables
   //
 
@@ -41,29 +60,29 @@ var example2d = function () {
       //var progress = loader.fractionComplete();
       var progress = ludum.game.userData.stateT / 5.0;
 
-      clearScreen("#AAAAAA");
+      clearScreen(COLORS.background);
 
       // Draw the loading bar outline.
       var w = canvas.width * 0.9;
       var h = 32;
       var x = (canvas.width - w) / 2.0;
       var y = (canvas.height - h) / 2.0;
-      ctx.strokeStyle = "#0077AA";
+      ctx.strokeStyle = COLORS.loadingBar;
       ctx.strokeRect(x, y, w, h);
 
       // Draw the loading bar progress rect.
       w *= progress;
-      ctx.fillStyle = "#0077AA";
+      ctx.fillStyle = COLORS.loadingBar;
       ctx.fillRect(x, y, w, h);
 
       // Draw the loading text.
       var msg = ludum.roundTo(progress * 100.0, 0) + "%";
-      ctx.font = "24px SansSerif";
+      ctx.font = FONTS.loadingText;
       w = ctx.measureText(msg).width;
       h = 24;
       x = (canvas.width - w) / 2.0;
       y = (canvas.height + h) / 2.0 - 4;
-      ctx.fillStyle = "#00AABB";
+      ctx.fillStyle = COLORS.loadingText;
       ctx.fillText(msg, x, y);
     },
 
@@ -101,7 +120,7 @@ var example2d = function () {
     // Draw the menu.
     'draw': function ()
     {
-      clearScreen("#AAAAAA");
+      clearScreen(COLORS.background);
       drawMenu(menuOption,
         "Play game",
         "Settings",
@@ -162,7 +181,7 @@ var example2d = function () {
 
     'draw': function ()
     {
-      clearScreen("#AAAAAA");
+      clearScreen(COLORS.background);
       drawMenu(settingsMenuOption,
         "Controls",
         "Video",
@@ -227,7 +246,7 @@ var example2d = function () {
 
   function drawMenu(selectedIndex /*, entry 1, entry 2, ... */)
   {
-    ctx.font = "48px SansSerif";
+    ctx.font = FONTS.menuUnselectedText;
 
     var numEntries = arguments.length - 1;
 
@@ -242,12 +261,12 @@ var example2d = function () {
 
     for (var i = 1, endI = arguments.length; i < endI; ++i) {
       if ((i - 1) == selectedIndex) {
-        ctx.font = "56px SansSerif";
-        ctx.fillStyle = "#0000BB";
+        ctx.font = FONTS.menuSelectedText;
+        ctx.fillStyle = COLORS.menuSelectedText;
       }
       else {
-        ctx.font = "48px SansSerif";
-        ctx.fillStyle = "#00AABB";
+        ctx.font = FONTS.menuUnselectedText;
+        ctx.fillStyle = COLORS.menuUnselectedText;
       }
       ctx.fillText(arguments[i], x, y);
       y += h + lineSpacing;
