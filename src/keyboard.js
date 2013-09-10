@@ -9,11 +9,13 @@ ludum.addSymbols(function(){
   //
 
   var keycodes = {
+    'ENTER': 13,
     'ESCAPE': 27,
     'LEFT': 37,
     'RIGHT': 39,
     'UP': 38,
-    'DOWN': 40
+    'DOWN': 40,
+    'SPACE': " "
   };
 
 
