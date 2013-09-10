@@ -12,7 +12,8 @@ var example2d = function () {
   var ctx;    // The drawing context for the game (a 2D context in this case).
   var loader; // The asset loader. This is configured and started when we enter the 'loading' state.
 
-  var menuOption; // The index of the current selected menu option.
+  var menuOption;         // The index of the current selected option in the main menu.
+  var settingsMenuOption; // The index of the current selected option in the settings menu.
 
 
   //
@@ -40,8 +41,7 @@ var example2d = function () {
       //var progress = loader.fractionComplete();
       var progress = ludum.game.userData.stateT / 5.0;
 
-      ctx.fillStyle = "#AAAAAA";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      clearScreen("#AAAAAA");
 
       // Draw the loading bar outline.
       var w = canvas.width * 0.9;
@@ -101,39 +101,13 @@ var example2d = function () {
     // Draw the menu.
     'draw': function ()
     {
-      var menuEntries = [
+      clearScreen("#AAAAAA");
+      drawMenu(menuOption,
         "Play game",
         "Settings",
         "High scores",
         "Credits"
-      ];
-
-      ctx.fillStyle = "#AAAAAA";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.font = "48px SansSerif";
-
-      var w = 0;
-      var h = 48;
-      var lineSpacing = 16;
-      for (var i = 0, endI = menuEntries.length; i < endI; ++i)
-        w = Math.max(w, ctx.measureText(menuEntries[i]).width);
-      var totalHeight = h * menuEntries.length + lineSpacing * menuEntries.length - 1;
-      var x = (canvas.width - w) / 2.0;
-      var y = (canvas.height - totalHeight + h) / 2.0;
-
-      for (var i = 0, endI = menuEntries.length; i < endI; ++i) {
-        if (i == menuOption) {
-          ctx.font = "56px SansSerif";
-          ctx.fillStyle = "#0000BB";
-        }
-        else {
-          ctx.font = "48px SansSerif";
-          ctx.fillStyle = "#00AABB";
-        }
-        ctx.fillText(menuEntries[i], x, y);
-        y += h + lineSpacing;
-      }
+      );
     },
 
 
@@ -173,6 +147,42 @@ var example2d = function () {
   //
   // Drawing functions
   //
+
+  function clearScreen(bgColor)
+  {
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+
+  function drawMenu(selectedIndex /*, entry 1, entry 2, ... */)
+  {
+    ctx.font = "48px SansSerif";
+
+    var numEntries = arguments.length - 1;
+
+    var w = 0;
+    var h = 48;
+    var lineSpacing = 16;
+    for (var i = 1, endI = arguments.length; i < endI; ++i)
+      w = Math.max(w, ctx.measureText(arguments[i]).width);
+    var totalHeight = h * numEntries + lineSpacing * (numEntries - 1);
+    var x = (canvas.width - w) / 2.0;
+    var y = (canvas.height - totalHeight + h) / 2.0;
+
+    for (var i = 1, endI = arguments.length; i < endI; ++i) {
+      if ((i - 1) == selectedIndex) {
+        ctx.font = "56px SansSerif";
+        ctx.fillStyle = "#0000BB";
+      }
+      else {
+        ctx.font = "48px SansSerif";
+        ctx.fillStyle = "#00AABB";
+      }
+      ctx.fillText(arguments[i], x, y);
+      y += h + lineSpacing;
+    }
+  }
 
 
   //
