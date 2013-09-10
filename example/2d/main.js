@@ -134,10 +134,10 @@ var example2d = function () {
     'update': function (dt)
     {
       var targetStates = [
-        ludum.game.LOADING,
+        ludum.game.PLAYING,
         ludum.game.SETTINGS,
-        ludum.game.LOADING,
-        ludum.game.LOADING
+        ludum.game.MENU,      // High scores screen isn't implemented yet.
+        ludum.game.MENU       // Credits screen isn't implemented yet.
       ];
 
       // If the player is pressing space or enter, accept the current menu
@@ -194,9 +194,9 @@ var example2d = function () {
     'update': function (dt)
     {
       var targetStates = [
-        ludum.game.SETTINGS,
-        ludum.game.SETTINGS,
-        ludum.game.SETTINGS,
+        ludum.game.SETTINGS,  // Control settings aren't implemented yet.
+        ludum.game.SETTINGS,  // Video settings aren't implemented yet.
+        ludum.game.SETTINGS,  // Audio settings aren't implemented yet.
         ludum.game.MENU,
       ];
 
@@ -228,6 +228,33 @@ var example2d = function () {
         else if (settingsMenuOption >= targetStates.length)
           settingsMenuOption -= targetStates.length;
         ludum.clearKeyboard();
+      }
+    },
+  };
+
+
+  //
+  // PLaying state
+  //
+
+  var playingFuncs = {
+    'enter': function ()
+    {
+    },
+
+
+    'draw': function ()
+    {
+      clearScreen(COLORS.background);
+    },
+
+
+    'update': function ()
+    {
+      // If the player is pressing escape, take them back to the main menu.
+      if (ludum.isKeyPressed(ludum.keycodes.ESCAPE)) {
+        ludum.clearKeyboard();
+        ludum.game.changeState(ludum.game.MENU);
       }
     },
   };
@@ -306,7 +333,7 @@ var example2d = function () {
     ludum.game.addState('LOADING', loadingFuncs);
     ludum.game.addState('MENU', menuFuncs);
     ludum.game.addState('SETTINGS', settingsFuncs);
-    //ludum.game.addState('PLAYING', playingFuncs);
+    ludum.game.addState('PLAYING', playingFuncs);
     //ludum.game.addState('PAUSED', pausedFuncs);
     //ludum.game.addState('WIN', winFuncs);
     //ludum.game.addState('LOSE', loseFuncs);
