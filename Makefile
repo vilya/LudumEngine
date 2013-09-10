@@ -3,7 +3,7 @@ CLOSURE_COMPILER_FLAGS =
 CLOSURE_COMPILER = java -jar $(CLOSURE_COMPILER_DIR)/compiler.jar
 
 # Note that the order of this list is important. If foo.js depends on bar.js,
-# then bar.js must appear *before* foor.js in the list.
+# then bar.js must appear *before* foo.js in the list.
 SRCS = \
   src/base.js \
   src/states.js \
@@ -26,7 +26,7 @@ TEST_SRCS = \
 
 # Note here that we don't build a minified version of test-ludum.js. It's
 # because the Closure Compiler chokes on QUnit's throws() function, saying it's
-# a reserved word
+# a reserved word.
 all: dirs build/ludum.js build/ludum.min.js build/test-ludum.js
 
 
