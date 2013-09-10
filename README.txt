@@ -61,10 +61,15 @@ Still to do
 
 There's lots! Here's what I'm thinking:
 
-- Convert the inline documentation to jsdoc format & set up a make rule for doc
-  generation.
-- Write more high-level documentation.
 - A complete, working, example game.
+- A menu system, including support for submenus.
+- Input abstractions:
+  - Map keyboard/mouse/touch/joystick input to user-defined game events.
+  - Support for remapping inputs, to provide configurable controls.
+- State machine improvements
+  - Make it hierarchical.
+  - Support per state data - it makes some parts of the game code much cleaner.
+- HUDs, both as HTML overlays and as textures for WebGL.
 - Geometric data structures (quadtree, octree, BVH, kD-Tree).
 - Scene graph.
 - More intersection tests.
@@ -77,8 +82,7 @@ There's lots! Here's what I'm thinking:
   - SVG
 - Audio mixing support.
 - 2D and 3D positional audio.
-- HUDs, both as HTML overlays and as textures for WebGL.
-- A menu system, including support for submenus.
-- Input abstractions:
-  - Map keyboard/mouse/touch/joystick input to user-defined game events.
-  - Support for remapping inputs, to provide configurable controls.
+- Convert the inline documentation to jsdoc format & set up a make rule for doc
+  generation.
+- Write more high-level documentation.
+- Extend the unit test coverage.
