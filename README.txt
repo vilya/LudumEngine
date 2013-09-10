@@ -78,3 +78,7 @@ There's lots! Here's what I'm thinking:
 - Audio mixing support.
 - 2D and 3D positional audio.
 - HUDs, both as HTML overlays and as textures for WebGL.
+- A menu system, including support for submenus.
+- Input abstractions:
+  - Map keyboard/mouse/touch/joystick input to user-defined game events.
+  - Support for remapping inputs, to provide configurable controls.
