@@ -62,7 +62,6 @@ Still to do
 There's lots! Here's what I'm thinking:
 
 - A complete, working, example game.
-- A menu system, including support for submenus.
 - Input abstractions:
   - Map keyboard/mouse/touch/joystick input to user-defined game events.
   - Support for remapping inputs, to provide configurable controls.
