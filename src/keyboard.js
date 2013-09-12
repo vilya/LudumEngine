@@ -63,6 +63,18 @@ ludum.addSymbols(function(){
   }
 
 
+  function isAnyOfSeveralKeysPressed(/* key, key, ... */)
+  {
+    var key;
+    for (var i = 0, end = arguments.length; i < end; ++i) {
+      key = arguments[i];
+      if (keysDown[key])
+        return true;
+    }
+    return false;
+  }
+
+
   //
   // Private functions
   //
@@ -92,7 +104,8 @@ ludum.addSymbols(function(){
     'useKeyboard': useKeyboard,
     'clearKeyboard': clearKeyboard,
     'anyKeyPressed': anyKeyPressed,
-    'isKeyPressed': isKeyPressed
+    'isKeyPressed': isKeyPressed,
+    'isAnyOfSeveralKeysPressed': isAnyOfSeveralKeysPressed
   };
 
 }());
