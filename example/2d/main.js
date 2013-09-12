@@ -78,7 +78,7 @@ var example2d = function () {
 
   var loadingFuncs = {
     // Create, configure and start the asset loader.
-    'enter': function ()
+    'enter': function (game)
     {
       // Create the asset loader.
       //loader = new ludum.Loader();
@@ -92,10 +92,10 @@ var example2d = function () {
 
 
     // Draw the loading screen.
-    'draw': function ()
+    'draw': function (game)
     {
       //var progress = loader.fractionComplete();
-      var progress = ludum.game.userData.stateT / 3.0;
+      var progress = game.userData.stateT / 3.0;
 
       clearScreen(COLORS.background);
 
@@ -125,16 +125,16 @@ var example2d = function () {
 
 
     // Check whether we've finished loading. If so, switch to the MENU state.
-    'update': function (dt)
+    'update': function (game, dt)
     {
       //var progress = loader.fractionComplete();
-      var progress = ludum.game.userData.stateT / 3.0;
+      var progress = game.userData.stateT / 3.0;
       if (progress >= 1.0)
         ludum.game.changeState(ludum.game.MENU);
     },
 
 
-    'leave': function ()
+    'leave': function (game)
     {
       // Post-process any assets that still need it.
       // TODO
@@ -148,14 +148,14 @@ var example2d = function () {
 
   var menuFuncs = {
     // Reset the menu to the default state.
-    'enter': function ()
+    'enter': function (game)
     {
       menu.reset();
     },
 
 
     // Draw the menu.
-    'draw': function ()
+    'draw': function (game)
     {
       clearScreen(COLORS.background);
       drawMenu(menu);
@@ -163,7 +163,7 @@ var example2d = function () {
 
 
     // Handle keystrokes and mouse clicks.
-    'update': function (dt)
+    'update': function (game, dt)
     {
       // Space or Enter accepts the currently selected menu option.
       if (ludum.isKeyPressed(ludum.keycodes.ENTER) || ludum.isKeyPressed(ludum.keycodes.SPACE)) {
@@ -214,7 +214,7 @@ var example2d = function () {
   //
 
   var startingGameFuncs = {
-    'draw': function ()
+    'draw': function (game)
     {
       clearScreen(COLORS.background);
 
@@ -232,18 +232,18 @@ var example2d = function () {
     },
 
 
-    'update': function (dt)
+    'update': function (game, dt)
     {
-      var t = ludum.game.userData.stateT;
+      var t = game.userData.stateT;
       if (t >= 3.0) {
-        ludum.game.changeState(ludum.game.PLAYING);
+        game.changeState(game.PLAYING);
         return;
       }
 
       // If the player is pressing escape, take them back to the main menu.
       if (ludum.isKeyPressed(ludum.keycodes.ESCAPE)) {
         ludum.clearKeyboard();
-        ludum.game.changeState(ludum.game.MENU);
+        game.changeState(game.MENU);
       }
     }
   };
@@ -254,27 +254,27 @@ var example2d = function () {
   //
 
   var playingFuncs = {
-    'enter': function ()
+    'enter': function (game)
     {
       player = defaultPlayer.newInstance();
       player.start();
     },
 
 
-    'draw': function ()
+    'draw': function (game)
     {
       clearScreen(COLORS.background);
       drawLevel();
-      drawPlayer();
+      drawPlayer(player.userData);
     },
 
 
-    'update': function (dt)
+    'update': function (game, dt)
     {
       // If the player is pressing escape, take them back to the main menu.
       if (ludum.isKeyPressed(ludum.keycodes.ESCAPE)) {
         ludum.clearKeyboard();
-        ludum.game.changeState(ludum.game.MENU);
+        game.changeState(game.MENU);
         return;
       }
 
@@ -289,7 +289,7 @@ var example2d = function () {
   //
 
   var playerDefaultStateFuncs = {
-    'update': function (dt)
+    'update': function (player, dt)
     {
       // Move player.
       var dx = 0.0, dy = 0.0;
@@ -367,18 +367,18 @@ var example2d = function () {
   }
 
 
-  function drawPlayer()
+  function drawPlayer(playerData)
   {
     var lowX = canvas.width * 0.25;
     var lowY = canvas.height * 0.25;
     var highX = canvas.width - lowX;
     var highY = canvas.height - lowY;
 
-    var x = ludum.clamp((canvas.width - player.userData.w) / 2.0 + player.userData.x, lowX, highX);
-    var y = ludum.clamp((canvas.height - player.userData.h) / 2.0 + player.userData.y, lowY, highY);
+    var x = ludum.clamp((canvas.width - playerData.w) / 2.0 + playerData.x, lowX, highX);
+    var y = ludum.clamp((canvas.height - playerData.h) / 2.0 + playerData.y, lowY, highY);
 
     ctx.fillStyle = COLORS.player;
-    ctx.fillRect(x, y, player.userData.w, player.userData.h);
+    ctx.fillRect(x, y, playerData.w, playerData.h);
   }
 
 
