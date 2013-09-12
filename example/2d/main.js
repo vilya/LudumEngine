@@ -18,10 +18,10 @@ var example2d = function () {
   };
 
   var FONTS = {
-    'loadingText':        "24px Ringbearer",
-    'menuSelectedText':   "56px Ringbearer",
-    'menuUnselectedText': "48px Ringbearer",
-    'countdown':          "64px Ringbearer",
+    'loadingText':        "24px Alagard",
+    'menuSelectedText':   "56px Alagard",
+    'menuUnselectedText': "48px Alagard",
+    'countdown':          "64px Alagard",
   };
 
   var MENU_ACTIONS = {
