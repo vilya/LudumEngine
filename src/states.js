@@ -7,13 +7,13 @@ ludum.addSymbols(function(){
   //
   // StateMachine class
   //
+
   // This is an executable state machine. If you need multiple instances of the
   // same state machine (e.g. for NPC behaviour), you should set up a clean
   // instance then manufacture new instances by cloning from it.
   //
   // Note that the first state you add is assumed to be the starting state,
   // unless you call setInitialState to tell it otherwise.
-
   function StateMachine(name, userData)
   {
     this.name = name;
@@ -61,10 +61,10 @@ ludum.addSymbols(function(){
   // The state template can define functions that the state machine will call
   // automatically:
   //
-  // - enter()      is called when transitioning into a state.
-  // - update(dt)   is called regularly while in the state; dt is the time
-  //                   delta since the last update.
-  // - leave()      is called when transitioning out of a state.
+  // - enter(this)        is called when transitioning into a state.
+  // - update(this, dt)   is called regularly while in the state; dt is the
+  //                      time delta since the last update.
+  // - leave(this)        is called when transitioning out of a state.
   StateMachine.prototype.addState = function (name, kwargs)
   {
     if (this[name] !== undefined)
@@ -116,7 +116,7 @@ ludum.addSymbols(function(){
     var stateObj = this.states[this.currentState];
     if (this.logging)
       console.log(this.name + " entering start state '" + stateObj.name + "'");
-    stateObj.enter();
+    stateObj.enter(this);
   }
 
 
@@ -135,7 +135,7 @@ ludum.addSymbols(function(){
 
     // Update the current state. This may set the nextState attribute as a
     // side-effect.
-    stateObj.update(dt);
+    stateObj.update(this, dt);
 
     // If the update caused a transition, handle that now.
     if (this.nextState != this.currentState) {
@@ -143,7 +143,7 @@ ludum.addSymbols(function(){
       var oldStateObj = this.states[this.currentState];
       if (this.logging)
         console.log(this.name + " leaving state '" + oldStateObj.name + "'");
-      oldStateObj.leave();
+      oldStateObj.leave(this);
 
       // Change the current state.
       this.currentState = this.nextState;
@@ -152,7 +152,7 @@ ludum.addSymbols(function(){
       var newStateObj = this.states[this.currentState];
       if (this.logging)
         console.log(this.name + " entering state '" + newStateObj.name + "'");
-      newStateObj.enter();
+      newStateObj.enter(this);
     }
   }
 
