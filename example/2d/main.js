@@ -72,6 +72,8 @@ var example2d = function () {
     'tileSize': 32, // In pixels
   };
 
+  var game = new ludum.StateMachine('Game');
+
 
   //
   // Loading state
@@ -96,7 +98,7 @@ var example2d = function () {
     'draw': function (game)
     {
       //var progress = loader.fractionComplete();
-      var progress = game.userData.stateT / 3.0;
+      var progress = game.stateT / 3.0;
 
       clearScreen(COLORS.background);
 
@@ -129,9 +131,9 @@ var example2d = function () {
     'update': function (game, dt)
     {
       //var progress = loader.fractionComplete();
-      var progress = game.userData.stateT / 3.0;
+      var progress = game.stateT / 3.0;
       if (progress >= 1.0)
-        ludum.game.changeState(ludum.game.MENU);
+        game.changeState(game.MENU);
     },
 
 
@@ -177,10 +179,10 @@ var example2d = function () {
           menu.leaveSubmenu();
           break;
         case MENU_ACTIONS.playGame:
-          ludum.game.changeState(ludum.game.STARTING_GAME);
+          game.changeState(game.STARTING_GAME);
           break;
         case MENU_ACTIONS.restart:
-          ludum.game.changeState(ludum.game.LOADING);
+          game.changeState(game.LOADING);
           break;
         default:
           break;
@@ -219,7 +221,7 @@ var example2d = function () {
     {
       clearScreen(COLORS.background);
 
-      var msg = ludum.roundTo(Math.ceil(3.0 - ludum.game.userData.stateT), 0);
+      var msg = ludum.roundTo(Math.ceil(3.0 - game.stateT), 0);
 
       ctx.font = FONTS.countdown;
       ctx.fillStyle = COLORS.countdown;
@@ -235,8 +237,7 @@ var example2d = function () {
 
     'update': function (game, dt)
     {
-      var t = game.userData.stateT;
-      if (t >= 3.0) {
+      if (game.stateT >= 3.0) {
         game.changeState(game.PLAYING);
         return;
       }
@@ -413,17 +414,17 @@ var example2d = function () {
     ludum.useKeyboard();
     ludum.useMouse();
 
-    ludum.game.addState('LOADING', loadingFuncs);
-    ludum.game.addState('MENU', menuFuncs);
-    ludum.game.addState('STARTING_GAME', startingGameFuncs);
-    ludum.game.addState('PLAYING', playingFuncs);
-    //ludum.game.addState('PAUSED', pausedFuncs);
-    //ludum.game.addState('WIN', winFuncs);
-    //ludum.game.addState('LOSE', loseFuncs);
-    //ludum.game.addState('HIGHSCORES', highScoresFuncs);
-    //ludum.game.addState('CREDITS', creditsFuncs);
+    game.addState('LOADING', loadingFuncs);
+    game.addState('MENU', menuFuncs);
+    game.addState('STARTING_GAME', startingGameFuncs);
+    game.addState('PLAYING', playingFuncs);
+    //game.addState('PAUSED', pausedFuncs);
+    //game.addState('WIN', winFuncs);
+    //game.addState('LOSE', loseFuncs);
+    //game.addState('HIGHSCORES', highScoresFuncs);
+    //game.addState('CREDITS', creditsFuncs);
 
-    //ludum.game.setInitialState(ludum.game.STARTING_GAME); // For debugging
+    //game.setInitialState(game.STARTING_GAME); // For debugging
 
     defaultPlayer.addState('DEFAULT', playerDefaultStateFuncs);
 
@@ -438,7 +439,7 @@ var example2d = function () {
     if (!initGame())
       return;
 
-    ludum.startGame();
+    ludum.startGame(game);
   }
 
 

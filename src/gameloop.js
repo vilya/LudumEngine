@@ -11,15 +11,9 @@ ludum.addSymbols(function(){
   // Global variables
   //
 
-  // The state machine which runs the game as a whole. Add all the necessary
-  // states to this then call the startGame() function to launch into the main
-  // game loop. The game loop will automatically call game.update(dt) on each
-  // iteration (with a correct value for dt).
-  var game = new ludum.StateMachine("Game", {
-    'gameT': 0.0,   // Current global time, in seconds since the start of the epoch (NOT milliseconds).
-    'stateT': 0.0,  // Time we've been in the current state for, in seconds.
-    'enterT': 0.0   // Time at which we entered the current state (a saved copy of gameT from then).
-  });
+  // The state machine for the game as a whole. This gets set to the value you
+  // pass in to the startGame function. 
+  var game = null;
 
 
   //
@@ -28,12 +22,14 @@ ludum.addSymbols(function(){
 
   // Call this to start the main game loop. Make sure you've configured the
   // game state machine first though!
-  function startGame()
+  function startGame(gameStateMachine)
   {
+    if (game !== null)
+      throw new Error('game has already been started');
+
     // Set the game context variables.
-    game.userData.gameT = Date.now() / 1000.0;
-    game.userData.stateT = 0.0;
-    game.userData.enterT = game.userData.gameT;
+    game = gameStateMachine;
+    ludum.updateCurrentTime();
 
     // Start the game state machine.
     game.start();
@@ -57,18 +53,13 @@ ludum.addSymbols(function(){
       stateObj.draw(game);
 
     // Figure out how much time has passed since the last update.
-    var t = Date.now() / 1000.0;
-    var dt = t - game.userData.gameT;
-    game.userData.gameT = t;
-    game.userData.stateT = t - game.userData.enterT;
+    var prevT = ludum.currentTime();
+    ludum.updateCurrentTime();
+    var dt = ludum.currentTime() - prevT;
 
-    // Update the current state. If that results in the game entering a new
-    // state, record the time at which we entered the state.
-    var oldState = game.currentState;
+    // Update the game state machine. This may result in a single state
+    // transition.
     game.update(dt);
-    var newState = game.currentState;
-    if (newState != oldState)
-      game.userData.enterT = t;
   }
 
 
@@ -77,7 +68,6 @@ ludum.addSymbols(function(){
   //
 
   return {
-    'game': game,
     'startGame': startGame
   };
 

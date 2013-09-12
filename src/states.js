@@ -21,8 +21,10 @@ ludum.addSymbols(function(){
     this.logging = false;
 
     this.states = [];
-    this.currentState = -1;
-    this.nextState = 0;
+    this.currentState = -1; // ID of the current state. Invalid until start() has been called.
+    this.nextState = 0;     // ID of the state to change into next. The value here will be the initial state.
+    this.stateT = 0.0;      // Time we've been in the current state for, in seconds.
+    this.enterT = 0.0;      // Time at which we entered the current state (a saved copy of ludum.currentTime() from then).
   }
 
 
@@ -111,6 +113,8 @@ ludum.addSymbols(function(){
   {
     // Change the current state.
     this.currentState = this.nextState;
+    this.stateT = 0.0;
+    this.enterT = ludum.currentTime();
 
     // Enter the new state.
     var stateObj = this.states[this.currentState];
@@ -135,6 +139,7 @@ ludum.addSymbols(function(){
 
     // Update the current state. This may set the nextState attribute as a
     // side-effect.
+    this.stateT = ludum.currentTime() - this.enterT;
     stateObj.update(this, dt);
 
     // If the update caused a transition, handle that now.
@@ -147,6 +152,8 @@ ludum.addSymbols(function(){
 
       // Change the current state.
       this.currentState = this.nextState;
+      this.stateT = 0.0;
+      this.enterT = ludum.currentTime();
 
       // Enter the new state.
       var newStateObj = this.states[this.currentState];
