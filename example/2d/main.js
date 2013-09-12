@@ -15,6 +15,7 @@ var example2d = function () {
     'menuSelectedText':   "#997777",
     'menuUnselectedText': "#990000",
     'countdown':          "#990000",
+    'player':             "#AAAAAA",
   };
 
   var FONTS = {
@@ -53,6 +54,22 @@ var example2d = function () {
     new ludum.MenuItem("Credits", MENU_ACTIONS.ignore),
     new ludum.MenuItem("Restart", MENU_ACTIONS.restart)
   ));
+
+  var defaultPlayer = new ludum.StateMachine('Player', {
+    'x': 0,
+    'y': 0,
+    'w': 32,
+    'h': 32,
+    'speed': 256
+  });
+  var player = null;
+
+  var level = {
+    'x': -50,
+    'y': -50,
+    'w': 100,
+    'h': 100
+  };
 
 
   //
@@ -239,23 +256,60 @@ var example2d = function () {
   var playingFuncs = {
     'enter': function ()
     {
+      player = defaultPlayer.newInstance();
+      player.start();
     },
 
 
     'draw': function ()
     {
       clearScreen(COLORS.background);
+      drawLevel();
+      drawPlayer();
     },
 
 
-    'update': function ()
+    'update': function (dt)
     {
       // If the player is pressing escape, take them back to the main menu.
       if (ludum.isKeyPressed(ludum.keycodes.ESCAPE)) {
         ludum.clearKeyboard();
         ludum.game.changeState(ludum.game.MENU);
+        return;
       }
+
+      // Update the player
+      player.update(dt);
     },
+  };
+
+
+  //
+  // Player states
+  //
+
+  var playerDefaultStateFuncs = {
+    'update': function (dt)
+    {
+      // Move player.
+      var dx = 0.0, dy = 0.0;
+      if (ludum.isAnyOfSeveralKeysPressed(ludum.keycodes.LEFT, "A", "a"))
+        dx -= 1.0;
+      if (ludum.isAnyOfSeveralKeysPressed(ludum.keycodes.RIGHT, "D", "d"))
+        dx += 1.0;
+      if (ludum.isAnyOfSeveralKeysPressed(ludum.keycodes.UP, "W", "w"))
+        dy -= 1.0;
+      if (ludum.isAnyOfSeveralKeysPressed(ludum.keycodes.DOWN, "S", "s"))
+        dy += 1.0;
+
+      if (dx !== 0.0 || dy !== 0.0) {
+        var scaledSpeed = Math.sqrt(dx * dx + dy * dy) * dt * player.userData.speed;
+        var mx = dx * scaledSpeed;
+        var my = dy * scaledSpeed;
+        player.userData.x = ludum.clamp(player.userData.x + mx, level.x, level.x + level.w);
+        player.userData.y = ludum.clamp(player.userData.y + my, level.y, level.y + level.h);
+      }
+    }
   };
 
 
@@ -308,6 +362,26 @@ var example2d = function () {
   }
 
 
+  function drawLevel()
+  {
+  }
+
+
+  function drawPlayer()
+  {
+    var lowX = canvas.width * 0.25;
+    var lowY = canvas.height * 0.25;
+    var highX = canvas.width - lowX;
+    var highY = canvas.height - lowY;
+
+    var x = ludum.clamp((canvas.width - player.userData.w) / 2.0 + player.userData.x, lowX, highX);
+    var y = ludum.clamp((canvas.height - player.userData.h) / 2.0 + player.userData.y, lowY, highY);
+
+    ctx.fillStyle = COLORS.player;
+    ctx.fillRect(x, y, player.userData.w, player.userData.h);
+  }
+
+
   //
   // Main functions
   //
@@ -336,6 +410,7 @@ var example2d = function () {
   function initGame()
   {
     ludum.useKeyboard();
+    ludum.useMouse();
 
     ludum.game.addState('LOADING', loadingFuncs);
     ludum.game.addState('MENU', menuFuncs);
@@ -346,6 +421,10 @@ var example2d = function () {
     //ludum.game.addState('LOSE', loseFuncs);
     //ludum.game.addState('HIGHSCORES', highScoresFuncs);
     //ludum.game.addState('CREDITS', creditsFuncs);
+
+    //ludum.game.setInitialState(ludum.game.STARTING_GAME); // For debugging
+
+    defaultPlayer.addState('DEFAULT', playerDefaultStateFuncs);
 
     return true;
   }
