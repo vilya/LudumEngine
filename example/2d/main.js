@@ -56,19 +56,20 @@ var example2d = function () {
   ));
 
   var defaultPlayer = new ludum.StateMachine('Player', {
-    'x': 0,
-    'y': 0,
-    'w': 32,
-    'h': 32,
-    'speed': 256
+    'x': 0,         // In pixels
+    'y': 0,         // In pixels
+    'w': 32,        // In pixels
+    'h': 32,        // In pixels
+    'speed': 256    // In pixels/second
   });
   var player = null;
 
   var level = {
-    'x': -50,
-    'y': -50,
-    'w': 100,
-    'h': 100
+    'x': -1600,     // In pixels
+    'y': -1600,     // In pixels
+    'w': 3200,      // In pixels
+    'h': 3200,      // In pixels
+    'tileSize': 32, // In pixels
   };
 
 
