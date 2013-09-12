@@ -54,7 +54,7 @@ ludum.addSymbols(function(){
     // Draw the current state.
     var stateObj = game.states[game.currentState];
     if (stateObj.draw)
-      stateObj.draw();
+      stateObj.draw(game);
 
     // Figure out how much time has passed since the last update.
     var t = Date.now() / 1000.0;
