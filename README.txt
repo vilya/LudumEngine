@@ -9,8 +9,8 @@ Features
 ========
 
 - State machines (this is what started it all!).
-- A specialised state machine for the main game loop, so you can define your
-  game in terms of states like 'loading', 'main_menu', 'playing', etc.
+- Extra support for using a state machine to describe the overall game
+  structure.
 - Input handling for mouse and keyboard.
 - Asynchronous asset loading, with groups and post-processing, with support for
   text, images, audio and custom (user-defined) asset types.
