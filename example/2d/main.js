@@ -16,6 +16,7 @@ var example2d = function () {
     'menuUnselectedText': "#990000",
     'countdown':          "#990000",
     'player':             "#AAAAAA",
+    'grid':               "#333333",
   };
 
   var FONTS = {
@@ -60,7 +61,7 @@ var example2d = function () {
     'y': 0,         // In pixels
     'w': 32,        // In pixels
     'h': 32,        // In pixels
-    'speed': 256    // In pixels/second
+    'speed': 256,   // In pixels/second
   });
   var player = null;
 
@@ -70,6 +71,11 @@ var example2d = function () {
     'w': 3200,      // In pixels
     'h': 3200,      // In pixels
     'tileSize': 32, // In pixels
+  };
+
+  var view = {
+    'x': 0,         // Screen horizontal offset in pixels
+    'y': 0,         // Screen vertical offset in pixels.
   };
 
   var game = new ludum.StateMachine('Game');
@@ -258,6 +264,7 @@ var example2d = function () {
   var playingFuncs = {
     'enter': function (game)
     {
+      // Reset the player.
       player = defaultPlayer.newInstance();
       player.start();
     },
@@ -305,11 +312,35 @@ var example2d = function () {
         dy += 1.0;
 
       if (dx !== 0.0 || dy !== 0.0) {
-        var scaledSpeed = Math.sqrt(dx * dx + dy * dy) * dt * player.userData.speed;
-        var mx = dx * scaledSpeed;
-        var my = dy * scaledSpeed;
+        var length = Math.sqrt(dx * dx + dy * dy);
+        var mx = dx / length * dt * player.userData.speed;
+        var my = dy / length * dt * player.userData.speed;
         player.userData.x = ludum.clamp(player.userData.x + mx, level.x, level.x + level.w);
         player.userData.y = ludum.clamp(player.userData.y + my, level.y, level.y + level.h);
+
+        // Calculate the inner bounding region of the viewport.
+        var ix = view.x + canvas.width * 0.25;
+        var iy = view.y + canvas.height * 0.5;
+        var iw = canvas.width * 0.5;
+        var ih = canvas.height * 0.5;
+
+        // If the new player position is outside the inner bounding region,
+        // move the viewport so that they remain on the edge of it.
+        var dx = player.userData.x - ix;
+        var dy = player.userData.y - iy;
+
+        if (dx < 0)
+          view.x += dx;
+        else if (dx > iw)
+          view.x += (dx - iw);
+
+        if (dy < 0)
+          view.y += dy;
+        else if (dy > ih)
+          view.y += (dy - ih);
+
+        view.x = ludum.clamp(view.x, level.x, level.x + level.w - canvas.width);
+        view.y = ludum.clamp(view.y, level.y, level.y + level.h - canvas.height);
       }
     }
   };
@@ -366,21 +397,34 @@ var example2d = function () {
 
   function drawLevel()
   {
+    ctx.strokeStyle = COLORS.grid;
+    var endX = level.x + level.w - view.x;
+    var endY = level.y + level.h - view.y;
+    for (var y = level.y - view.y; y < endY; y += level.tileSize * 2) {
+      for (var x = level.x - view.y; x < endX; x += level.tileSize * 2) {
+        ctx.strokeRect(x, y, level.tileSize, level.tileSize);
+      }
+    }
   }
 
 
   function drawPlayer(playerData)
   {
-    var lowX = canvas.width * 0.25;
-    var lowY = canvas.height * 0.25;
-    var highX = canvas.width - lowX;
-    var highY = canvas.height - lowY;
+    var x = playerData.x - view.x - playerData.w / 2.0;
+    var y = playerData.y - view.y - playerData.h / 2.0;
 
-    var x = ludum.clamp((canvas.width - playerData.w) / 2.0 + playerData.x, lowX, highX);
-    var y = ludum.clamp((canvas.height - playerData.h) / 2.0 + playerData.y, lowY, highY);
+    x = ludum.clamp(x, 0, canvas.width);
+    y = ludum.clamp(y, 0, canvas.height);
 
     ctx.fillStyle = COLORS.player;
     ctx.fillRect(x, y, playerData.w, playerData.h);
+
+    ctx.fillStyle = COLORS.loadingText;
+    ctx.font = FONTS.loadingText;
+    var msg = "x, y = " + ludum.roundTo(playerData.x, 0) + ", " + ludum.roundTo(playerData.y, 0);
+    ctx.fillText(msg, 32, 32);
+    msg = "vx, vy = " + ludum.roundTo(view.x, 0) + ", " + ludum.roundTo(view.y, 0);
+    ctx.fillText(msg, 32, 64);
   }
 
 
@@ -424,7 +468,7 @@ var example2d = function () {
     //game.addState('HIGHSCORES', highScoresFuncs);
     //game.addState('CREDITS', creditsFuncs);
 
-    //game.setInitialState(game.STARTING_GAME); // For debugging
+    game.setInitialState(game.STARTING_GAME); // For debugging
 
     defaultPlayer.addState('DEFAULT', playerDefaultStateFuncs);
 
