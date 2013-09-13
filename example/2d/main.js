@@ -264,6 +264,10 @@ var example2d = function () {
   var playingFuncs = {
     'enter': function (game)
     {
+      // Reset the view position.
+      view.x = -canvas.width / 2.0;
+      view.y = -canvas.height / 2.0;
+
       // Reset the player.
       player = defaultPlayer.newInstance();
       player.start();
@@ -320,7 +324,7 @@ var example2d = function () {
 
         // Calculate the inner bounding region of the viewport.
         var ix = view.x + canvas.width * 0.25;
-        var iy = view.y + canvas.height * 0.5;
+        var iy = view.y + canvas.height * 0.25;
         var iw = canvas.width * 0.5;
         var ih = canvas.height * 0.5;
 
@@ -401,7 +405,7 @@ var example2d = function () {
     var endX = level.x + level.w - view.x;
     var endY = level.y + level.h - view.y;
     for (var y = level.y - view.y; y < endY; y += level.tileSize * 2) {
-      for (var x = level.x - view.y; x < endX; x += level.tileSize * 2) {
+      for (var x = level.x - view.x; x < endX; x += level.tileSize * 2) {
         ctx.strokeRect(x, y, level.tileSize, level.tileSize);
       }
     }
