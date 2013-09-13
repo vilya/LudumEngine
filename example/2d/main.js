@@ -462,6 +462,7 @@ var example2d = function () {
     ludum.useKeyboard();
     ludum.useMouse();
 
+    game.logging = true;
     game.addState('LOADING', loadingFuncs);
     game.addState('MENU', menuFuncs);
     game.addState('STARTING_GAME', startingGameFuncs);
@@ -472,8 +473,9 @@ var example2d = function () {
     //game.addState('HIGHSCORES', highScoresFuncs);
     //game.addState('CREDITS', creditsFuncs);
 
-    game.setInitialState(game.STARTING_GAME); // For debugging
+    //game.setInitialState(game.STARTING_GAME); // For debugging
 
+    defaultPlayer.logging = true;
     defaultPlayer.addState('DEFAULT', playerDefaultStateFuncs);
 
     return true;
