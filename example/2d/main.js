@@ -65,6 +65,16 @@ var example2d = function () {
   });
   var player = null;
 
+  var defaultEnemy = new ludum.StateMachine('Enemy', {
+    'x': 0,         // In pixels
+    'y': 0,         // In pixels
+    'w': 32,        // In pixels
+    'h': 32,        // In pixels
+    'speed': 256,   // In pixels/second
+  });
+  var enemies = [];
+  var totalSpawned = 0;
+
   var level = {
     'x': -1600,     // In pixels
     'y': -1600,     // In pixels
@@ -271,6 +281,12 @@ var example2d = function () {
       // Reset the player.
       player = defaultPlayer.newInstance();
       player.start();
+
+      // Clear out all the old enemies.
+      enemies = [];
+
+      // Spawn a single new enemy, for testing.
+      spawnEnemy();
     },
 
 
@@ -278,7 +294,13 @@ var example2d = function () {
     {
       clearScreen(COLORS.background);
       drawLevel();
+
+      // Draw the player.
       drawPlayer(player.userData);
+
+      // Draw the enemies.
+      for (var i = 0, end = enemies.length; i < end; ++i)
+        drawPlayer(enemies[i].userData);
     },
 
 
@@ -293,6 +315,16 @@ var example2d = function () {
 
       // Update the player
       player.update(dt);
+
+      // Cull any dead enemies.
+      // TODO
+
+      // Update existing enemies
+      for (var i = 0, end = enemies.length; i < end; ++i)
+        enemies[i].update(dt);
+
+      // Spawn any new enemies.
+      // TODO
     },
   };
 
@@ -433,6 +465,28 @@ var example2d = function () {
 
 
   //
+  // Game logic
+  //
+
+  function spawnEnemy()
+  {
+    // Create the new enemy.
+    var enemy = defaultEnemy.newInstance();
+    enemy.name += (" #" + totalSpawned);
+
+    // Decide where to spawn.
+    // TODO: make sure we don't spawn on the player, inside a wall or anything like that.
+    // TODO: pick somewhere not visible to the player
+    var x = level.x + level.tileSize / 2 + Math.floor(Math.random() * level.w / level.tileSize) * level.tileSize;
+    var y = level.y + level.tileSize / 2 + Math.floor(Math.random() * level.h / level.tileSize) * level.tileSize;
+    enemy.userData.x = x;
+    enemy.userData.y = y;
+
+    ++totalSpawned;
+  }
+
+
+  //
   // Main functions
   //
 
@@ -477,6 +531,10 @@ var example2d = function () {
 
     defaultPlayer.logging = true;
     defaultPlayer.addState('DEFAULT', playerDefaultStateFuncs);
+
+    defaultEnemy.logging = true;
+    defaultEnemy.addState('IDLE', enemyIdleStateFuncs);
+    defaultEnemy.addState('ATTACKING', enemyAttackingStateFuncs);
 
     return true;
   }
