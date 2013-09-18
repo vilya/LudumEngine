@@ -286,7 +286,7 @@ var example2d = function () {
       enemies = [];
 
       // Spawn a single new enemy, for testing.
-      spawnEnemy();
+      spawnEnemy(100, 100);
     },
 
 
@@ -383,6 +383,18 @@ var example2d = function () {
 
 
   //
+  // Enemy states
+  //
+
+  var enemyIdleStateFuncs = {
+  };
+
+
+  var enemyAttackingStateFuncs = {
+  };
+
+  
+  //
   // Drawing functions
   //
 
@@ -468,7 +480,7 @@ var example2d = function () {
   // Game logic
   //
 
-  function spawnEnemy()
+  function spawnEnemy(sx, sy)
   {
     // Create the new enemy.
     var enemy = defaultEnemy.newInstance();
@@ -477,8 +489,12 @@ var example2d = function () {
     // Decide where to spawn.
     // TODO: make sure we don't spawn on the player, inside a wall or anything like that.
     // TODO: pick somewhere not visible to the player
-    var x = level.x + level.tileSize / 2 + Math.floor(Math.random() * level.w / level.tileSize) * level.tileSize;
-    var y = level.y + level.tileSize / 2 + Math.floor(Math.random() * level.h / level.tileSize) * level.tileSize;
+    var x = sx;
+    var y = sy;
+    if (x === undefined)
+      x = level.x + level.tileSize / 2 + Math.floor(Math.random() * level.w / level.tileSize) * level.tileSize;
+    if (y === undefined)
+      y = level.y + level.tileSize / 2 + Math.floor(Math.random() * level.h / level.tileSize) * level.tileSize;
     enemy.userData.x = x;
     enemy.userData.y = y;
 
