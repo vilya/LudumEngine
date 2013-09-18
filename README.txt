@@ -18,6 +18,23 @@ Features
 - Geometric intersection tests.
 
 
+Building
+========
+
+From the root of the checkout:
+
+  make
+
+This will create three files in the 
+
+  build/ludum.js      - a concatenation of all the source js files.
+  build/ludum.min.js  - a minified version of build/ludum.js.
+  build/test-ludum.js - a concatenation of all the test js files.
+
+Building isn't necessary in order to use the library, but it makes it more
+convenient.
+
+
 Usage
 =====
 
@@ -25,7 +42,7 @@ The basic flow is:
 - Check the browser capabilities to make sure it has everything you're going
   to need.
 - Set up input handlers by calling e.g. ludum.useKeyboard().
-- Set up the different game states.
+- Create a state machine for the game and set up the different game states.
 - Add transitions between the states.
 - Create an asset loader & add assets to it.
 - Start the main game loop by calling ludum.startGame().
@@ -36,12 +53,13 @@ loader, and a 'draw' function which draws the loading screen. You can add a
 condition event which checks whether the loader has finished and if so,
 transitions into the main starting state.
 
-Note that the library is modular now, so you can include just the parts you
-need. All the parts depend on base.js though (it defines the ludum namespace),
-so be sure to include that first.
+Note that the library is modular, so you can include just the parts you need.
+All the parts depend on base.js though (it defines the ludum namespace), so be
+sure to include that first. Or just use the minified version of the whole
+library. It's only about 14 Kb (at time of writing), or about 4 Kb if you gzip
+it.
 
-Or just use the minified version of the whole library. It's only about 13 Kb
-(at time of writing), or about 3.6 Kb if you gzip it.
+For more detail see the sample game in example/2d.
 
 
 Testing
