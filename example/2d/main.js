@@ -38,6 +38,9 @@ var example2d = function () {
   };
 
 
+  var MAX_VISIBLE_DISTANCE_SQR = 512.0 * 512.0; // Distance in pixels, squared
+
+
   //
   // Global variables
   //
@@ -73,7 +76,7 @@ var example2d = function () {
     'y': 0,         // In pixels
     'w': 32,        // In pixels
     'h': 32,        // In pixels
-    'speed': 256,   // In pixels/second
+    'speed': 192,   // In pixels/second
   });
   var enemies = [];
   var totalSpawned = 0;
@@ -444,10 +447,33 @@ var example2d = function () {
   //
 
   var enemyIdleStateFuncs = {
+    'update': function (enemy, dt)
+    {
+      // If we can see the player... ATTACK!
+      if (canSee(enemy, player))
+        enemy.changeState(enemy.ATTACKING);
+    }
   };
 
 
   var enemyAttackingStateFuncs = {
+    'update': function (enemy, dt)
+    {
+      // If we can no longer see the player, go back to doing nothing.
+      if (!canSee(enemy, player)) {
+        enemy.changeState(enemy.IDLE);
+        return;
+      }
+
+      // Move towards the player.
+      var dx = player.userData.x - enemy.userData.x;
+      var dy = player.userData.y - enemy.userData.y;
+      var length = Math.sqrt(dx * dx + dy * dy);
+      var mx = dx / length * dt * enemy.userData.speed;
+      var my = dy / length * dt * enemy.userData.speed;
+      enemy.userData.x = ludum.clamp(enemy.userData.x + mx, level.x, level.x + level.w);
+      enemy.userData.y = ludum.clamp(enemy.userData.y + my, level.y, level.y + level.h);
+    }
   };
 
   
@@ -568,6 +594,15 @@ var example2d = function () {
     enemy.start();
     enemies.push(enemy);
     ++totalSpawned;
+  }
+
+
+  function canSee(enemy, player)
+  {
+    var dx = player.userData.x - enemy.userData.x;
+    var dy = player.userData.y - enemy.userData.y;
+    var distanceSqr = dx * dx + dy * dy;
+    return (distanceSqr < MAX_VISIBLE_DISTANCE_SQR);
   }
 
 
