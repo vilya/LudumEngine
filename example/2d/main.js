@@ -14,6 +14,7 @@ var example2d = function () {
     'loadingText':        "#997777",
     'menuSelectedText':   "#997777",
     'menuUnselectedText': "#990000",
+    'pausedText':         "#990000",
     'countdown':          "#990000",
     'player':             "#AAAAAA",
     'grid':               "#333333",
@@ -23,6 +24,7 @@ var example2d = function () {
     'loadingText':        "24px Alagard",
     'menuSelectedText':   "56px Alagard",
     'menuUnselectedText': "48px Alagard",
+    'pausedText':         "48px Alagard",
     'countdown':          "64px Alagard",
   };
 
@@ -233,6 +235,24 @@ var example2d = function () {
   //
 
   var startingGameFuncs = {
+    'enter': function (game)
+    {
+      // Reset the view position.
+      view.x = -canvas.width / 2.0;
+      view.y = -canvas.height / 2.0;
+
+      // Reset the player.
+      player = defaultPlayer.newInstance();
+      player.start();
+
+      // Clear out all the old enemies.
+      enemies = [];
+
+      // Spawn a single new enemy, for testing.
+      spawnEnemy(100, 100);
+    },
+
+
     'draw': function (game)
     {
       clearScreen(COLORS.background);
@@ -272,24 +292,6 @@ var example2d = function () {
   //
 
   var playingFuncs = {
-    'enter': function (game)
-    {
-      // Reset the view position.
-      view.x = -canvas.width / 2.0;
-      view.y = -canvas.height / 2.0;
-
-      // Reset the player.
-      player = defaultPlayer.newInstance();
-      player.start();
-
-      // Clear out all the old enemies.
-      enemies = [];
-
-      // Spawn a single new enemy, for testing.
-      spawnEnemy(100, 100);
-    },
-
-
     'draw': function (game)
     {
       clearScreen(COLORS.background);
@@ -312,6 +314,11 @@ var example2d = function () {
         game.changeState(game.MENU);
         return;
       }
+      else if (ludum.isKeyPressed(ludum.keycodes.SPACE)) {
+        ludum.clearKeyboard();
+        game.changeState(game.PAUSED);
+        return;
+      }
 
       // Update the player
       player.update(dt);
@@ -325,6 +332,55 @@ var example2d = function () {
 
       // Spawn any new enemies.
       // TODO
+    },
+  };
+
+
+  //
+  // Paused state
+  //
+
+  var pausedFuncs = {
+    'enter': function (game)
+    {
+      ludum.pause();
+    },
+
+
+    'draw': function (game)
+    {
+      playingFuncs.draw(game);
+
+      var msg = "Paused";
+
+      ctx.font = FONTS.pausedText;
+      ctx.fillStyle = COLORS.pausedText;
+
+      // Draw the countdown.
+      var w = ctx.measureText(msg).width;
+      var h = 48;
+      var x = (canvas.width - w) / 2.0;
+      var y = (canvas.height - h) / 2.0;
+      ctx.fillText(msg, x, y);
+    },
+
+
+    'update': function (game, dt)
+    {
+      if (ludum.isKeyPressed(ludum.keycodes.ESCAPE)) {
+        ludum.clearKeyboard();
+        game.changeState(game.MENU);
+      }
+      else if (ludum.isKeyPressed(ludum.keycodes.SPACE)) {
+        ludum.clearKeyboard();
+        game.changeState(game.PLAYING);
+      }
+    },
+
+
+    'leave': function (game)
+    {
+      ludum.unpause();
     },
   };
 
@@ -537,7 +593,7 @@ var example2d = function () {
     game.addState('MENU', menuFuncs);
     game.addState('STARTING_GAME', startingGameFuncs);
     game.addState('PLAYING', playingFuncs);
-    //game.addState('PAUSED', pausedFuncs);
+    game.addState('PAUSED', pausedFuncs);
     //game.addState('WIN', winFuncs);
     //game.addState('LOSE', loseFuncs);
     //game.addState('HIGHSCORES', highScoresFuncs);
