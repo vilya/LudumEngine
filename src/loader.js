@@ -50,19 +50,19 @@ ludum.addSymbols(function(){
 
   Loader.prototype.addText = function (url, group, postprocess)
   {
-    this._addAsset(Loader.prototype.TEXT, url, group, postprocess, null, []);
+    this._addAsset(TEXT, url, group, postprocess, null, []);
   }
 
 
   Loader.prototype.addImage = function (url, group, postprocess)
   {
-    this._addAsset(Loader.prototype.IMAGE, url, group, postprocess, null, []);
+    this._addAsset(IMAGE, url, group, postprocess, null, []);
   }
 
 
   Loader.prototype.addAudio = function (url, group, postprocess)
   {
-    this._addAsset(Loader.prototype.AUDIO, url, group, postprocess, null, []);
+    this._addAsset(AUDIO, url, group, postprocess, null, []);
   }
 
 
@@ -74,7 +74,7 @@ ludum.addSymbols(function(){
   Loader.prototype.addCustom = function (url, group, postprocess, start /*, url, url, ... */)
   {
     var args = Array.prototype.slice.call(arguments);
-    this._addAsset(Loader.prototype.CUSTOM, url, group, postprocess, start, args.slice(4));
+    this._addAsset(CUSTOM, url, group, postprocess, start, args.slice(4));
   }
 
 
@@ -112,7 +112,7 @@ ludum.addSymbols(function(){
 
   Loader.prototype.fractionComplete = function ()
   {
-    if (this.count == 0)
+    if (this.count === 0)
       return 1.0;
     else
       return (this.succeeded + this.failed) / this.count;
@@ -121,7 +121,7 @@ ludum.addSymbols(function(){
 
   Loader.prototype.fractionFailed = function ()
   {
-    if (this.count == 0)
+    if (this.count === 0)
       return 0.0;
     else
       return this.failed / this.count;
@@ -169,7 +169,7 @@ ludum.addSymbols(function(){
       return;
 
     switch (asset.type) {
-      case Loader.prototype.TEXT:
+      case TEXT:
         var req = new XMLHttpRequest();
         req.loader = this;
         req.onload = function () { this.loader._onLoaded(url, this.responseText); }
@@ -177,14 +177,14 @@ ludum.addSymbols(function(){
         req.open("GET", url, true);
         req.send();
         break;
-      case Loader.prototype.IMAGE:
+      case IMAGE:
         var img = new Image();
         img.loader = this;
         img.onload = function () { this.loader._onLoaded(url, this); }
         img.onerror = function () { this.loader._onFailed(url, "image loading failed"); }
         img.src = url;
         break;
-      case Loader.prototype.AUDIO:
+      case AUDIO:
         var auElem = document.createElement('audio');
         auElem.preload = true;
         auElem.controls = false;
@@ -194,7 +194,7 @@ ludum.addSymbols(function(){
         auElem.src = url;
         document.body.appendChild(auElem);
         break;
-      case Loader.prototype.CUSTOM:
+      case CUSTOM:
         var theLoader = this;
         var theArgs = [ url, 
                         function (val) { theLoader._onLoaded(url, val); },
