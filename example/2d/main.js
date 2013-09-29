@@ -16,6 +16,7 @@ var example2d = function () {
     'menuUnselectedText': "#990000",
     'pausedText':         "#990000",
     'countdown':          "#990000",
+    'gameOver':           "#990000",
     'player':             "#AAAAAA",
     'enemy':              "#990000",
     'grid':               "#333333",
@@ -27,6 +28,7 @@ var example2d = function () {
     'menuUnselectedText': "48px Alagard",
     'pausedText':         "48px Alagard",
     'countdown':          "64px Alagard",
+    'gameOver':           "64px Alagard",
   };
 
   var MENU_ACTIONS = {
@@ -72,6 +74,7 @@ var example2d = function () {
     'attackDuration': 0.5,    // How long an attack lasts for, in seconds.
     'damage': 1,              // Amount of damage caused by this attack if it connects.
     'health': 3,              // Number of hits the player can take before dying.
+    'deathDuration': 0.5,     // How long the death animation takes, in seconds.
     'dead': false,            // Whether the player is dead or not.
   });
   var player = null;
@@ -337,6 +340,12 @@ var example2d = function () {
       // Update the player
       player.update(dt);
 
+      // If the player is dead, it's game over. Game over, man! Game over!
+      if (player.userData.dead) {
+        game.changeState(game.GAME_OVER);
+        return;
+      }
+
       // Cull any dead enemies.
       var numDead = 0;
       for (var i = 0, end = enemies.length; i < end; i++) {
@@ -412,12 +421,56 @@ var example2d = function () {
 
 
   //
+  // Game Over state
+  //
+
+  var gameOverFuncs = {
+    'enter': function (game)
+    {
+      ludum.clearKeyboard();
+    },
+
+
+    'draw': function (game)
+    {
+      clearScreen(COLORS.background);
+
+      var msg = "Game Over";
+
+      ctx.font = FONTS.gameOver;
+      ctx.fillStyle = COLORS.gameOver;
+
+      // Draw the countdown.
+      var w = ctx.measureText(msg).width;
+      var h = 64;
+      var x = (canvas.width - w) / 2.0;
+      var y = (canvas.height - h) / 2.0;
+      ctx.fillText(msg, x, y);
+    },
+
+
+    'update': function (game, dt)
+    {
+      if (game.stateT >= 5.0 || ludum.isAnyOfSeveralKeysPressed(ludum.keycodes.ESCAPE, ludum.keycodes.SPACE)) {
+        ludum.clearKeyboard();
+        game.changeState(game.MENU);
+      }
+    }
+  };
+
+
+  //
   // Player states
   //
 
   var playerMovingStateFuncs = {
     'update': function (player, dt)
     {
+      if (player.userData.health <= 0.0) {
+        player.changeState(player.DYING);
+        return;
+      }
+
       if (ludum.isKeyPressed(ludum.keycodes.SPACE)) {
         player.changeState(player.ATTACKING);
         return;
@@ -468,6 +521,7 @@ var example2d = function () {
     }
   };
 
+
   var playerAttackingStateFuncs = {
     'enter': function (player)
     {
@@ -477,6 +531,11 @@ var example2d = function () {
 
     'update': function (player, dt)
     {
+      if (player.userData.health <= 0.0) {
+        ludum.changeState(player.DYING);
+        return;
+      }
+
       // Damage arrives halfway through the swing.
       if (player.stateT >= player.userData.attackDuration * 0.5 && !player.userData.attackDelivered) {
         // Deliver damage to all enemies within range.
@@ -495,6 +554,15 @@ var example2d = function () {
       // If the swing has finished, switch back to the chasing state.
       if (player.stateT >= player.userData.attackDuration)
         player.changeState(player.MOVING);
+    }
+  };
+
+
+  var playerDyingStateFuncs = {
+    'update': function (player, dt)
+    {
+      if (player.stateT >= player.userData.deathDuration)
+        player.userData.dead = true;
     }
   };
 
@@ -589,7 +657,7 @@ var example2d = function () {
 
 
   var enemyDyingStateFuncs = {
-    'update': function (enemy)
+    'update': function (enemy, dt)
     {
       if (enemy.stateT >= enemy.userData.deathDuration)
         enemy.userData.dead = true;
@@ -778,8 +846,7 @@ var example2d = function () {
     game.addState('STARTING_GAME', startingGameFuncs);
     game.addState('PLAYING', playingFuncs);
     game.addState('PAUSED', pausedFuncs);
-    //game.addState('WIN', winFuncs);
-    //game.addState('LOSE', loseFuncs);
+    game.addState('GAME_OVER', gameOverFuncs);
     //game.addState('HIGHSCORES', highScoresFuncs);
     //game.addState('CREDITS', creditsFuncs);
 
@@ -788,6 +855,7 @@ var example2d = function () {
     defaultPlayer.logging = true;
     defaultPlayer.addState('MOVING', playerMovingStateFuncs);
     defaultPlayer.addState('ATTACKING', playerAttackingStateFuncs);
+    defaultPlayer.addState('DYING', playerDyingStateFuncs);
 
     defaultEnemy.logging = true;
     defaultEnemy.addState('IDLE', enemyIdleStateFuncs);
