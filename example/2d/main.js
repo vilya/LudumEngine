@@ -72,6 +72,7 @@ var example2d = function () {
     'attackDuration': 0.5,    // How long an attack lasts for, in seconds.
     'damage': 1,              // Amount of damage caused by this attack if it connects.
     'health': 3,              // Number of hits the player can take before dying.
+    'dead': false,            // Whether the player is dead or not.
   });
   var player = null;
 
@@ -86,6 +87,8 @@ var example2d = function () {
     'attackDelivered': false, // Whether the damage for an attack has been delivered yet.
     'damage': 1,              // Amount of damage caused by this attack if it connects.
     'health': 1,              // Number of hits this enemy can take before dying.
+    'deathDuration': 0.5,     // How long the death animation takes for this enemy, in seconds.
+    'dead': false,            // Whether this enemy is dead or not.
   });
   var enemies = [];
   var totalSpawned = 0;
@@ -337,13 +340,13 @@ var example2d = function () {
       // Cull any dead enemies.
       var numDead = 0;
       for (var i = 0, end = enemies.length; i < end; i++) {
-        if (enemies[i].userData.health <= 0.0)
+        if (enemies[i].userData.dead)
           ++numDead;
       }
       if (numDead > 0) {
         var liveEnemies = [];
         for (var i = enemies.length - 1; i >= 0; --i) {
-          if (enemies[i].userData.health > 0.0)
+          if (!enemies[i].userData.dead)
             liveEnemies.push(enemies[i]);
         }
         enemies = liveEnemies;
@@ -503,9 +506,15 @@ var example2d = function () {
   var enemyIdleStateFuncs = {
     'update': function (enemy, dt)
     {
+      // If health has reached zero, start dying.
+      if (enemy.userData.health <= 0.0) {
+        enemy.changeState(enemy.DYING);
+        return;
+      }
+
       // If we can see the player, start running at them!
       if (canSee(enemy, player))
-        enemy.changeState(enemy.ATTACKING);
+        enemy.changeState(enemy.CHASING);
     }
   };
 
@@ -513,6 +522,12 @@ var example2d = function () {
   var enemyChasingStateFuncs = {
     'update': function (enemy, dt)
     {
+      // If health has reached zero, start dying.
+      if (enemy.userData.health <= 0.0) {
+        enemy.changeState(enemy.DYING);
+        return;
+      }
+
       // If we can no longer see the player, go back to doing nothing.
       if (!canSee(enemy, player)) {
         enemy.changeState(enemy.IDLE);
@@ -549,6 +564,12 @@ var example2d = function () {
 
     'update': function (enemy, dt)
     {
+      // If health has reached zero, start dying.
+      if (enemy.userData.health <= 0.0) {
+        enemy.changeState(enemy.DYING);
+        return;
+      }
+
       // Damage arrives halfway through the swing.
       if (enemy.stateT >= enemy.userData.attackDuration * 0.5 && !enemy.userData.attackDelivered) {
         // Check if the player is still within range.
@@ -563,6 +584,15 @@ var example2d = function () {
       // If the swing has finished, switch back to the chasing state.
       if (enemy.stateT >= enemy.userData.attackDuration)
         enemy.changeState(enemy.CHASING);
+    }
+  };
+
+
+  var enemyDyingStateFuncs = {
+    'update': function (enemy)
+    {
+      if (enemy.stateT >= enemy.userData.deathDuration)
+        enemy.userData.dead = true;
     }
   };
 
@@ -763,6 +793,7 @@ var example2d = function () {
     defaultEnemy.addState('IDLE', enemyIdleStateFuncs);
     defaultEnemy.addState('CHASING', enemyChasingStateFuncs);
     defaultEnemy.addState('ATTACKING', enemyAttackingStateFuncs);
+    defaultEnemy.addState('DYING', enemyDyingStateFuncs);
 
     return true;
   }
