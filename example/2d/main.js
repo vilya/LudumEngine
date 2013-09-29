@@ -82,11 +82,12 @@ var example2d = function () {
   var totalSpawned = 0;
 
   var level = {
-    'x': -1600,     // In pixels
-    'y': -1600,     // In pixels
-    'w': 3200,      // In pixels
-    'h': 3200,      // In pixels
-    'tileSize': 32, // In pixels
+    'x': -1600,           // In pixels
+    'y': -1600,           // In pixels
+    'w': 3200,            // In pixels
+    'h': 3200,            // In pixels
+    'tileSize': 32,       // In pixels
+    'initialEnemies': 10, // # of enemies to spawn before starting this level.
   };
 
   var view = {
@@ -252,8 +253,9 @@ var example2d = function () {
       // Clear out all the old enemies.
       enemies = [];
 
-      // Spawn a single new enemy, for testing.
-      spawnEnemy(100, 100);
+      // Spawn some initial enemies.
+      for (var i = 0, end = level.initialEnemies; i < end; ++i)
+        spawnEnemy();
     },
 
 
