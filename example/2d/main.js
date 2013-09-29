@@ -39,6 +39,9 @@ var example2d = function () {
     'restart':      4,
   };
 
+  var IMAGES = {
+    'floor': null,
+  };
 
   var MAX_VISIBLE_DISTANCE_SQR = 512.0 * 512.0; // Distance in pixels, squared
 
@@ -122,21 +125,24 @@ var example2d = function () {
     'enter': function (game)
     {
       // Create the asset loader.
-      //loader = new ludum.Loader();
+      loader = new ludum.Loader();
 
       // Configure all the assets to be loaded.
-      // TODO
+      loader.addImage("img/floor_tile_32x32.png", null, function (img) {
+        IMAGES.floor = img;
+        return img;
+      })
 
       // Start loading.
-      //loader.start();
+      loader.start();
     },
 
 
     // Draw the loading screen.
     'draw': function (game)
     {
-      //var progress = loader.fractionComplete();
-      var progress = game.stateT / 3.0;
+      var progress = loader.fractionComplete();
+      //var progress = game.stateT / 3.0;
 
       clearScreen(COLORS.background);
 
@@ -168,8 +174,8 @@ var example2d = function () {
     // Check whether we've finished loading. If so, switch to the MENU state.
     'update': function (game, dt)
     {
-      //var progress = loader.fractionComplete();
-      var progress = game.stateT / 3.0;
+      var progress = loader.fractionComplete();
+      //var progress = game.stateT / 3.0;
       if (progress >= 1.0)
         game.changeState(game.MENU);
     },
@@ -721,7 +727,8 @@ var example2d = function () {
     var endY = level.y + level.h - view.y;
     for (var y = level.y - view.y; y < endY; y += level.tileSize * 2) {
       for (var x = level.x - view.x; x < endX; x += level.tileSize * 2) {
-        ctx.strokeRect(x, y, level.tileSize, level.tileSize);
+        //ctx.strokeRect(x, y, level.tileSize, level.tileSize);
+        ctx.drawImage(IMAGES.floor, x, y, level.tileSize * 2, level.tileSize * 2);
       }
     }
   }
