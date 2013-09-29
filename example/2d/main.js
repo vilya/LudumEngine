@@ -63,12 +63,15 @@ var example2d = function () {
   ));
 
   var defaultPlayer = new ludum.StateMachine('Player', {
-    'x': 0,         // In pixels
-    'y': 0,         // In pixels
-    'w': 32,        // In pixels
-    'h': 32,        // In pixels
-    'speed': 256,   // In pixels/second
-    'health': 3,    // Number of hits the player can take before dying.
+    'x': 0,                   // In pixels
+    'y': 0,                   // In pixels
+    'w': 32,                  // In pixels
+    'h': 32,                  // In pixels
+    'speed': 256,             // In pixels/second
+    'attackRange': 32,        // How far away, in pixels, the players attack can reach.
+    'attackDuration': 0.5,    // How long an attack lasts for, in seconds.
+    'damage': 1,              // Amount of damage caused by this attack if it connects.
+    'health': 3,              // Number of hits the player can take before dying.
   });
   var player = null;
 
@@ -78,7 +81,7 @@ var example2d = function () {
     'w': 32,                  // In pixels
     'h': 32,                  // In pixels
     'speed': 192,             // In pixels/second
-    'attackRange': 32,        // How far away, in pixels, the enemy's attack can reach.
+    'attackRange': 32,        // How far away, in pixels, the enemys attack can reach.
     'attackDuration': 0.5,    // How long an attack lasts for, in seconds.
     'attackDelivered': false, // Whether the damage for an attack has been delivered yet.
     'damage': 1,              // Amount of damage caused by this attack if it connects.
@@ -324,11 +327,6 @@ var example2d = function () {
       // If the player is pressing escape, take them back to the main menu.
       if (ludum.isKeyPressed(ludum.keycodes.ESCAPE)) {
         ludum.clearKeyboard();
-        game.changeState(game.MENU);
-        return;
-      }
-      else if (ludum.isKeyPressed(ludum.keycodes.SPACE)) {
-        ludum.clearKeyboard();
         game.changeState(game.PAUSED);
         return;
       }
@@ -337,7 +335,19 @@ var example2d = function () {
       player.update(dt);
 
       // Cull any dead enemies.
-      // TODO
+      var numDead = 0;
+      for (var i = 0, end = enemies.length; i < end; i++) {
+        if (enemies[i].userData.health <= 0.0)
+          ++numDead;
+      }
+      if (numDead > 0) {
+        var liveEnemies = [];
+        for (var i = enemies.length - 1; i >= 0; --i) {
+          if (enemies[i].userData.health > 0.0)
+            liveEnemies.push(enemies[i]);
+        }
+        enemies = liveEnemies;
+      }
 
       // Update existing enemies
       for (var i = 0, end = enemies.length; i < end; ++i)
@@ -402,9 +412,14 @@ var example2d = function () {
   // Player states
   //
 
-  var playerDefaultStateFuncs = {
+  var playerMovingStateFuncs = {
     'update': function (player, dt)
     {
+      if (ludum.isKeyPressed(ludum.keycodes.SPACE)) {
+        player.changeState(player.ATTACKING);
+        return;
+      }
+
       // Move player.
       var dx = 0.0, dy = 0.0;
       if (ludum.isAnyOfSeveralKeysPressed(ludum.keycodes.LEFT, "A", "a"))
@@ -447,6 +462,36 @@ var example2d = function () {
         view.x = ludum.clamp(view.x, level.x, level.x + level.w - canvas.width);
         view.y = ludum.clamp(view.y, level.y, level.y + level.h - canvas.height);
       }
+    }
+  };
+
+  var playerAttackingStateFuncs = {
+    'enter': function (player)
+    {
+      player.userData.attackDelivered = false;
+    },
+
+
+    'update': function (player, dt)
+    {
+      // Damage arrives halfway through the swing.
+      if (player.stateT >= player.userData.attackDuration * 0.5 && !player.userData.attackDelivered) {
+        // Deliver damage to all enemies within range.
+        // TODO: restrict this to all enemies within some angle either side of the attack direction.
+        for (var i = 0, end = enemies.length; i < end; ++i) {
+          var enemy = enemies[i];
+          var dx = enemy.userData.x - player.userData.x;
+          var dy = enemy.userData.y - player.userData.y;
+          var length = Math.sqrt(dx * dx + dy * dy);
+          if (length < player.userData.attackRange)
+            takeDamage(enemy, player.userData.damage, player);
+        }
+        player.userData.attackDelivered = true;
+      }
+
+      // If the swing has finished, switch back to the chasing state.
+      if (player.stateT >= player.userData.attackDuration)
+        player.changeState(player.MOVING);
     }
   };
 
@@ -511,7 +556,7 @@ var example2d = function () {
         var dy = player.userData.y - enemy.userData.y;
         var length = Math.sqrt(dx * dx + dy * dy);
         if (length < enemy.userData.attackRange)
-          takeDamage(player.userData, enemy.userData.damage);
+          takeDamage(player, enemy.userData.damage, enemy);
         enemy.userData.attackDelivered = true;
       }
 
@@ -609,6 +654,10 @@ var example2d = function () {
 
     ctx.fillStyle = COLORS.enemy;
     ctx.fillRect(x, y, entity.w, entity.h);
+
+    ctx.fillStyle = COLORS.loadingText;
+    ctx.font = FONTS.loadingText;
+    ctx.fillText(ludum.roundTo(entity.health, 0), x + 4, y + entity.h - 4);
   }
 
 
@@ -649,11 +698,17 @@ var example2d = function () {
   }
 
 
-  function takeDamage(entity, damage)
+  function takeDamage(entity, damage, attacker)
   {
-    entity.health -= damage;
-    if (entity.health < 0.0)
-      entity.health = 0.0;
+    if (entity.userData.health <= 0.0)
+      return;
+
+    entity.userData.health -= damage;
+    if (entity.userData.health < 0.0)
+      entity.userData.health = 0.0;
+
+    var msg = attacker.name + " hit " + entity.name + " for " + damage + " points of damage";
+    console.log(msg);
   }
 
 
@@ -701,7 +756,8 @@ var example2d = function () {
     //game.setInitialState(game.STARTING_GAME); // For debugging
 
     defaultPlayer.logging = true;
-    defaultPlayer.addState('DEFAULT', playerDefaultStateFuncs);
+    defaultPlayer.addState('MOVING', playerMovingStateFuncs);
+    defaultPlayer.addState('ATTACKING', playerAttackingStateFuncs);
 
     defaultEnemy.logging = true;
     defaultEnemy.addState('IDLE', enemyIdleStateFuncs);
