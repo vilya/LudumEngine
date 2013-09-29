@@ -1,6 +1,6 @@
 // Include ludum.min.js before this file.
 if (!ludum)
-  throw Error("you must include ludum.min.js before this file");
+  throw Error("you must include ludum.js or ludum.min.js before this file");
 
 var example2d = function () {
 
