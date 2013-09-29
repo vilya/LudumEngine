@@ -68,15 +68,21 @@ var example2d = function () {
     'w': 32,        // In pixels
     'h': 32,        // In pixels
     'speed': 256,   // In pixels/second
+    'health': 3,    // Number of hits the player can take before dying.
   });
   var player = null;
 
   var defaultEnemy = new ludum.StateMachine('Enemy', {
-    'x': 0,         // In pixels
-    'y': 0,         // In pixels
-    'w': 32,        // In pixels
-    'h': 32,        // In pixels
-    'speed': 192,   // In pixels/second
+    'x': 0,                   // In pixels
+    'y': 0,                   // In pixels
+    'w': 32,                  // In pixels
+    'h': 32,                  // In pixels
+    'speed': 192,             // In pixels/second
+    'attackRange': 32,        // How far away, in pixels, the enemy's attack can reach.
+    'attackDuration': 0.5,    // How long an attack lasts for, in seconds.
+    'attackDelivered': false, // Whether the damage for an attack has been delivered yet.
+    'damage': 1,              // Amount of damage caused by this attack if it connects.
+    'health': 1,              // Number of hits this enemy can take before dying.
   });
   var enemies = [];
   var totalSpawned = 0;
@@ -252,6 +258,7 @@ var example2d = function () {
 
       // Clear out all the old enemies.
       enemies = [];
+      totalSpawned = 0;
 
       // Spawn some initial enemies.
       for (var i = 0, end = level.initialEnemies; i < end; ++i)
@@ -451,14 +458,14 @@ var example2d = function () {
   var enemyIdleStateFuncs = {
     'update': function (enemy, dt)
     {
-      // If we can see the player... ATTACK!
+      // If we can see the player, start running at them!
       if (canSee(enemy, player))
         enemy.changeState(enemy.ATTACKING);
     }
   };
 
 
-  var enemyAttackingStateFuncs = {
+  var enemyChasingStateFuncs = {
     'update': function (enemy, dt)
     {
       // If we can no longer see the player, go back to doing nothing.
@@ -467,14 +474,50 @@ var example2d = function () {
         return;
       }
 
-      // Move towards the player.
+      // If we're not within attacking distance of the player, move towards them.
       var dx = player.userData.x - enemy.userData.x;
       var dy = player.userData.y - enemy.userData.y;
       var length = Math.sqrt(dx * dx + dy * dy);
-      var mx = dx / length * dt * enemy.userData.speed;
-      var my = dy / length * dt * enemy.userData.speed;
-      enemy.userData.x = ludum.clamp(enemy.userData.x + mx, level.x, level.x + level.w);
-      enemy.userData.y = ludum.clamp(enemy.userData.y + my, level.y, level.y + level.h);
+      if (length > enemy.userData.attackRange) {
+        var mx = dx / length * dt * enemy.userData.speed;
+        var my = dy / length * dt * enemy.userData.speed;
+        enemy.userData.x = ludum.clamp(enemy.userData.x + mx, level.x, level.x + level.w);
+        enemy.userData.y = ludum.clamp(enemy.userData.y + my, level.y, level.y + level.h);
+      }
+
+      // If we are now within attacking range of the player, attack them!
+      var dx = player.userData.x - enemy.userData.x;
+      var dy = player.userData.y - enemy.userData.y;
+      var length = Math.sqrt(dx * dx + dy * dy);
+      if (length < enemy.userData.attackRange)
+        enemy.changeState(enemy.ATTACKING);
+    }
+  };
+
+
+  var enemyAttackingStateFuncs = {
+    'enter': function (enemy)
+    {
+      enemy.userData.attackDelivered = false;
+    },
+
+
+    'update': function (enemy, dt)
+    {
+      // Damage arrives halfway through the swing.
+      if (enemy.stateT >= enemy.userData.attackDuration * 0.5 && !enemy.userData.attackDelivered) {
+        // Check if the player is still within range.
+        var dx = player.userData.x - enemy.userData.x;
+        var dy = player.userData.y - enemy.userData.y;
+        var length = Math.sqrt(dx * dx + dy * dy);
+        if (length < enemy.userData.attackRange)
+          takeDamage(player.userData, enemy.userData.damage);
+        enemy.userData.attackDelivered = true;
+      }
+
+      // If the swing has finished, switch back to the chasing state.
+      if (enemy.stateT >= enemy.userData.attackDuration)
+        enemy.changeState(enemy.CHASING);
     }
   };
 
@@ -554,10 +597,8 @@ var example2d = function () {
 
     ctx.fillStyle = COLORS.loadingText;
     ctx.font = FONTS.loadingText;
-    var msg = "x, y = " + ludum.roundTo(entity.x, 0) + ", " + ludum.roundTo(entity.y, 0);
+    var msg = "Health " + ludum.roundTo(entity.health, 0);
     ctx.fillText(msg, 32, 32);
-    msg = "vx, vy = " + ludum.roundTo(view.x, 0) + ", " + ludum.roundTo(view.y, 0);
-    ctx.fillText(msg, 32, 64);
   }
 
 
@@ -605,6 +646,14 @@ var example2d = function () {
     var dy = player.userData.y - enemy.userData.y;
     var distanceSqr = dx * dx + dy * dy;
     return (distanceSqr < MAX_VISIBLE_DISTANCE_SQR);
+  }
+
+
+  function takeDamage(entity, damage)
+  {
+    entity.health -= damage;
+    if (entity.health < 0.0)
+      entity.health = 0.0;
   }
 
 
@@ -656,6 +705,7 @@ var example2d = function () {
 
     defaultEnemy.logging = true;
     defaultEnemy.addState('IDLE', enemyIdleStateFuncs);
+    defaultEnemy.addState('CHASING', enemyChasingStateFuncs);
     defaultEnemy.addState('ATTACKING', enemyAttackingStateFuncs);
 
     return true;
