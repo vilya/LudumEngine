@@ -17,6 +17,7 @@ var example2d = function () {
     'pausedText':         "#990000",
     'countdown':          "#990000",
     'player':             "#AAAAAA",
+    'enemy':              "#990000",
     'grid':               "#333333",
   };
 
@@ -302,7 +303,7 @@ var example2d = function () {
 
       // Draw the enemies.
       for (var i = 0, end = enemies.length; i < end; ++i)
-        drawPlayer(enemies[i].userData);
+        drawEnemy(enemies[i].userData);
     },
 
 
@@ -512,23 +513,33 @@ var example2d = function () {
   }
 
 
-  function drawPlayer(playerData)
+  function drawPlayer(entity)
   {
-    var x = playerData.x - view.x - playerData.w / 2.0;
-    var y = playerData.y - view.y - playerData.h / 2.0;
+    var x = entity.x - view.x - entity.w / 2.0;
+    var y = entity.y - view.y - entity.h / 2.0;
 
     x = ludum.clamp(x, 0, canvas.width);
     y = ludum.clamp(y, 0, canvas.height);
 
     ctx.fillStyle = COLORS.player;
-    ctx.fillRect(x, y, playerData.w, playerData.h);
+    ctx.fillRect(x, y, entity.w, entity.h);
 
     ctx.fillStyle = COLORS.loadingText;
     ctx.font = FONTS.loadingText;
-    var msg = "x, y = " + ludum.roundTo(playerData.x, 0) + ", " + ludum.roundTo(playerData.y, 0);
+    var msg = "x, y = " + ludum.roundTo(entity.x, 0) + ", " + ludum.roundTo(entity.y, 0);
     ctx.fillText(msg, 32, 32);
     msg = "vx, vy = " + ludum.roundTo(view.x, 0) + ", " + ludum.roundTo(view.y, 0);
     ctx.fillText(msg, 32, 64);
+  }
+
+
+  function drawEnemy(entity)
+  {
+    var x = entity.x - view.x - entity.w / 2.0;
+    var y = entity.y - view.y - entity.h / 2.0;
+
+    ctx.fillStyle = COLORS.enemy;
+    ctx.fillRect(x, y, entity.w, entity.h);
   }
 
 
@@ -554,6 +565,8 @@ var example2d = function () {
     enemy.userData.x = x;
     enemy.userData.y = y;
 
+    enemy.start();
+    enemies.push(enemy);
     ++totalSpawned;
   }
 
