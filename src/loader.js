@@ -11,7 +11,8 @@ ludum.addSymbols(function(){
   var TEXT = 0;
   var IMAGE = 1;
   var AUDIO = 2;
-  var CUSTOM = 3;
+  var JSONTEXT = 3;
+  var CUSTOM = 4;
 
 
   //
@@ -63,6 +64,12 @@ ludum.addSymbols(function(){
   Loader.prototype.addAudio = function (url, group, postprocess)
   {
     this._addAsset(AUDIO, url, group, postprocess, null, []);
+  }
+
+
+  Loader.prototype.addJSON = function (url, group, postprocess)
+  {
+    this._addAsset(JSONTEXT, url, group, postprocess, null, []);
   }
 
 
@@ -138,7 +145,7 @@ ludum.addSymbols(function(){
       return;
 
     if (this.verbose) {
-      var typeStr = [ "text", "image", "audio", "custom" ][type];
+      var typeStr = [ "text", "image", "audio", "json", "custom" ][type];
       console.log("adding " + typeStr + " asset: " + url);
     }
 
@@ -193,6 +200,14 @@ ludum.addSymbols(function(){
         auElem.addEventListener('error', function () { this.loader._onLoaded(url, this); });
         auElem.src = url;
         document.body.appendChild(auElem);
+        break;
+      case JSONTEXT:
+        var req = new XMLHttpRequest();
+        req.loader = this;
+        req.onload = function () { this.loader._onLoaded(url, JSON.parse(this.responseText)); }
+        req.onerror = function () { this.loader._onFailed(url, this.statusText); }
+        req.open("GET", url, true);
+        req.send();
         break;
       case CUSTOM:
         var theLoader = this;
