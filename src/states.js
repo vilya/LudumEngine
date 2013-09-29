@@ -2,6 +2,9 @@
 if (!ludum)
   throw Error("you must include base.js before this file");
 
+// Include time.js before this file as well.
+ludum.require('currentTime');
+
 ludum.addSymbols(function(){
  
   //

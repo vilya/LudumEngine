@@ -6,6 +6,7 @@ CLOSURE_COMPILER = java -jar $(CLOSURE_COMPILER_DIR)/compiler.jar
 # then bar.js must appear *before* foo.js in the list.
 SRCS = \
   src/base.js \
+  src/time.js \
   src/states.js \
   src/browser.js \
   src/gameloop.js \

@@ -11,36 +11,6 @@ var ludum = (function(){
 
 
   //
-  // Global variables
-  //
-
-  // The current time, from the game's point of view, in seconds since the
-  // start of the epoch (NOT milliseconds). This is a saved copy of the
-  // wall-clock time from when updateCurrentTime() was last called.
-  var gameTime = 0.0;
-
-
-  //
-  // Time functions
-  //
-
-  // Save the current time. This should be called once per frame.
-  function updateCurrentTime()
-  {
-    gameTime = Date.now() / 1000.0;
-  }
-
-
-  // Get the current time, from the game's point of view, in seconds since the
-  // start of the epoch. This is a floating point value with the fractional
-  // part representing fractions of a second.
-  function currentTime()
-  {
-    return gameTime;
-  }
-
-
-  //
   // Symbol manipulation functions
   //
  
@@ -120,9 +90,6 @@ var ludum = (function(){
   //
 
   return {
-    // Time functions
-    'updateCurrentTime': updateCurrentTime,
-    'currentTime': currentTime,
     // Symbol manipulation functions
     'hasNameClashes': hasNameClashes,
     'copySymbols': copySymbols,

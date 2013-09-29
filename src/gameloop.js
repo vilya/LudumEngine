@@ -2,8 +2,11 @@
 if (!ludum)
   throw Error("you must include base.js before this file");
 
-// Include statemachine.js before this file.
-ludum.require('StateMachine');
+// Include time.js and state.js before this file.
+ludum.require(
+  'currentTime', 'updateCurrentTime', // from time.js
+  'StateMachine'                      // from states.js
+);
 
 ludum.addSymbols(function(){
 
