@@ -21,6 +21,7 @@ ludum.addSymbols(function(){
 
   function Loader()
   {
+    this.started = false;
     this.count = 0;
     this.succeeded = 0;
     this.failed = 0;
@@ -90,6 +91,7 @@ ludum.addSymbols(function(){
     if (this.verbose)
       console.log("loading started");
 
+    this.started = true;
     for (var url in this.assets)
       this._startAsset(url);
   }
@@ -166,6 +168,9 @@ ludum.addSymbols(function(){
         this.addGroup(group);
       this.groups[group].assets.push(url);
     }
+
+    if (this.started)
+      this._startAsset(url);
   }
 
 
