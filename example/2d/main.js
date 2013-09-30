@@ -666,6 +666,18 @@ var example2d = function () {
       if (length > enemy.userData.attackRange) {
         var mx = dx / length * dt * enemy.userData.speed;
         var my = dy / length * dt * enemy.userData.speed;
+
+        var col = Math.floor(enemy.userData.x / level.tilewidth);
+        var row = Math.floor(enemy.userData.y / level.tileheight);
+        var newCol = Math.floor((enemy.userData.x + mx) / level.tilewidth);
+        var newRow = Math.floor((enemy.userData.y + my) / level.tileheight);
+        if (!validTile(newRow, newCol)) {
+          if (!validTile(row, newCol))
+            mx = 0;
+          if (!validTile(newRow, col))
+            my = 0;
+        }
+
         enemy.userData.x = ludum.clamp(enemy.userData.x + mx, level.x, level.x + level.w);
         enemy.userData.y = ludum.clamp(enemy.userData.y + my, level.y, level.y + level.h);
       }
