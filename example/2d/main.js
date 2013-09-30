@@ -36,7 +36,6 @@ var example2d = function () {
     'enterSubmenu': 1,
     'leaveSubmenu': 2,
     'playGame':     3,
-    'restart':      4,
   };
 
   var IMAGES = {
@@ -63,8 +62,7 @@ var example2d = function () {
       new ludum.MenuItem("Back to main menu", MENU_ACTIONS.leaveSubmenu)
     ),
     new ludum.MenuItem("High scores", MENU_ACTIONS.ignore),
-    new ludum.MenuItem("Credits", MENU_ACTIONS.ignore),
-    new ludum.MenuItem("Restart", MENU_ACTIONS.restart)
+    new ludum.MenuItem("Credits", MENU_ACTIONS.ignore)
   ));
 
   var defaultPlayer = new ludum.StateMachine('Player', {
@@ -252,9 +250,6 @@ var example2d = function () {
           break;
         case MENU_ACTIONS.playGame:
           game.changeState(game.STARTING_GAME);
-          break;
-        case MENU_ACTIONS.restart:
-          game.changeState(game.LOADING);
           break;
         default:
           break;
