@@ -1,0 +1,22 @@
+TO DO
+=====
+
+- Prevent player and enemies from moving through the walls.
+  - Use the non-zero tiles from the "walls" layer as the valid areas, prevent movement onto a zero tile.
+  - For the player:
+    - Cast a ray from the current position to the target position.
+    - Clamp the x value to the first horizontal hit.
+    - Clamp the y value to the first vertical hit.
+  - For the enemies:
+    - Same (for now).
+    - Future: A* path planning.
+
+- Prevent player and enemies from moving through each other.
+
+- Sprites for the player and enemies.
+
+- Make attacks directional.
+
+- Add animations for the player and enemy attacks.
+
+
