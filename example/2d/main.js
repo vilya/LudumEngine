@@ -834,9 +834,9 @@ var example2d = function () {
     var x = sx;
     var y = sy;
     if (x === undefined)
-      x = level.x + level.properties.tilewidth / 2 + Math.floor(Math.random() * level.w / level.properties.tilewidth) * level.properties.tilewidth;
+      x = level.x + level.tilewidth / 2 + Math.floor(Math.random() * level.w / level.tilewidth) * level.tilewidth;
     if (y === undefined)
-      y = level.y + level.properties.tileheight / 2 + Math.floor(Math.random() * level.h / level.properties.tileheight) * level.properties.tileheight;
+      y = level.y + level.tileheight / 2 + Math.floor(Math.random() * level.h / level.tileheight) * level.tileheight;
     enemy.userData.x = x;
     enemy.userData.y = y;
 
