@@ -860,21 +860,39 @@ var example2d = function () {
   // Game logic
   //
 
-  function spawnEnemy(sx, sy)
+  function spawnEnemy()
   {
     // Create the new enemy.
     var enemy = defaultEnemy.newInstance();
     enemy.name += (" #" + totalSpawned);
 
     // Decide where to spawn.
-    // TODO: make sure we don't spawn on the player, inside a wall or anything like that.
-    // TODO: pick somewhere not visible to the player
-    var x = sx;
-    var y = sy;
-    if (x === undefined)
-      x = level.x + level.tilewidth / 2 + Math.floor(Math.random() * level.w / level.tilewidth) * level.tilewidth;
-    if (y === undefined)
-      y = level.y + level.tileheight / 2 + Math.floor(Math.random() * level.h / level.tileheight) * level.tileheight;
+    // TODO: make sure we don't spawn on the player or on another enemy.
+    // TODO: pick somewhere not visible to the player?
+    var layer = level.layers[0];
+
+    var numValidTiles = 0;
+    for (var i = 0, endI = layer.data.length; i < endI; ++i) {
+      if (layer.data[i] > 0)
+        ++numValidTiles;
+    }
+
+    var x = 0, y = 0;
+
+    var tileNum = Math.floor(Math.random() * numValidTiles) % numValidTiles;
+    for (var i = 0, endI = layer.data.length; i < endI; ++i) {
+      if (layer.data[i] > 0) {
+        if (tileNum === 0) {
+          x = (i % layer.width) * level.tilewidth;
+          y = Math.floor(i / layer.width) * level.tileheight;
+          break;
+        }
+        else {
+          --tileNum;
+        }
+      }
+    }
+    
     enemy.userData.x = x;
     enemy.userData.y = y;
 
