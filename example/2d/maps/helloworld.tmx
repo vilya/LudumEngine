@@ -10,7 +10,7 @@
  </tileset>
  <layer name="Floor" width="40" height="40">
   <data encoding="base64" compression="zlib">
-   eJzVV12PgzAM4xkkkEAa//+f3iYtkuezm5RjY/dgdSNNk7r5aOdhGOYEy8XjdMdKGJ/fH/L9jpsZs731zme98G8ETMOrf9n+VqPvzoH5cHoxfxRzR2NDgfeH9lYz//F9e2KF/8EJ8odytSc+e7dv3id/38S6G8k3w99fELaUf8zfQlwEZ+ij40+hcr4b6QQnYff2RPg3iTPG/xX+Yo1K/vL+47fKxYXsKB9nsMtcrMPvWMjyl3XRL+SuAs5L5ENxmfGH3IQO+rXDvBbYP3XOjodqnQ+98KunT3CMhn3HA9ehXv72op5aZwH7aj9jIn8HfzxynVE8fJI/9q/Fzxnxh7o9YP4qOd5bG1T+VqH4a/UP7rct2TS89obKvICq4bhvpXME2Asq8wIt/1Yx/yiqa3EfwJzH+uf677vBdzSO1Sz+XF8+UxZ8850E7yaOP64t75Rl9zjHn+p5rfu30uuRubra4k/lEMvUmRyRub5SrX3uXnkGevnD+3mr3lb3NsF6yk6Lv6wWuD6WyVycqHOp9PXsjaTmt2Qc965XZb2+wp+6g+O67ixm0m/Z4f7n/ON4663HHFcuZ/EuoThzfPb0UdeDK/psF+Mge398Aso+xgH7ze+4T0HZd/x9wxgx5vy/evxv/GXxcAV/Lf++AZi/Z95DKm8j9VZS36/mqIIfjVBgcw==
+   eJztWFHPwyAI9Nm+tf//v35bMhN2O06ktp9LdgnJWlTgxIIrZX1sD9lB6uv9Cnj6UY1sZcy/Fg/OV/aQCzWvkrHVGevZw3nN3i78O16ym2fGidWzmHDvvbgxTnx/kHUP0B/EPxb7iDRbzD/Gn+WicWZ99PhjEoHl3XLi5dNWPvfYPiM8TqLnA+Nvvz1YO8xHBcsBiyUy9wx65zJzfqNrj6yhuMnyMIM/u5aHbO2YwV+Dsp/1byZ/an+zPNzF3wr59038qfqB9VbptvJeGyLjvDpQ4TebkxFbCyLjVE9g+cPxWYmu1asDNo/P9i8ZwR4N0cs/Fs9sXeMbexLMSRYf4kpdtGdRsaqe6wpu0XYkX72zpr4TWR3ajnz7vL5yhiioe4W9R2TF5oZnJ+Pf2fPg5QnbF4Ve/Gp8by3mP35Hev7dyZ+yg/XPm4P5hujpVF6xWuzx7GGkjno1ODJfoXf/uEMUevr/xqw+/CqM/jdwN378ncPq/tnzO7MPidyN2F0pcqdbEX+iDiTw
   </data>
  </layer>
  <layer name="Walls" width="40" height="40">
