@@ -99,7 +99,9 @@ var example2d = function () {
   var enemies = [];
   var totalSpawned = 0;
 
-  var level = {
+  var level = null;
+  /*
+  {
     'x': -1600,           // In pixels
     'y': -1600,           // In pixels
     'w': 3200,            // In pixels
@@ -107,6 +109,7 @@ var example2d = function () {
     'tileSize': 32,       // In pixels
     'initialEnemies': 10, // # of enemies to spawn before starting this level.
   };
+  */
 
   var view = {
     'x': 0,         // Screen horizontal offset in pixels
@@ -128,10 +131,27 @@ var example2d = function () {
       loader = new ludum.Loader();
 
       // Configure all the assets to be loaded.
+      /*
       loader.addImage("img/floor_tile_32x32.png", null, function (img) {
         IMAGES.floor = img;
         return img;
-      })
+      });
+      */
+
+      loader.addJSON("maps/helloworld.json", null, function (map) {
+        level = map;
+        level.x = 0;
+        level.y = 0;
+        level.w = map.tilewidth * map.width;
+        level.h = map.tileheight * map.height;
+        for (var i = 0, end = map.tilesets.length; i < end; ++i) {
+          var tileset = map.tilesets[i];
+          tileset.url = "maps/" + tileset.image;
+          tileset.image = null;
+          loader.addImage(tileset.url);
+        }
+        return map;
+      });
 
       // Start loading.
       loader.start();
@@ -183,8 +203,16 @@ var example2d = function () {
 
     'leave': function (game)
     {
-      // Post-process any assets that still need it.
-      // TODO
+      // Post-process the assets.
+      level.tilesetByTileID = [null];
+      for (var i = 0, end = level.tilesets.length; i < end; ++i) {
+        var tileset = level.tilesets[i];
+        tileset.image = loader.assets[tileset.url].value;
+        var numTiles = (tileset.imagewidth * tileset.imageheight) / (tileset.tilewidth * tileset.tileheight);
+        for (var j = 0, endJ = numTiles; j < endJ; ++j)
+          level.tilesetByTileID.push(tileset);
+      }
+
     },
   };
 
@@ -276,7 +304,7 @@ var example2d = function () {
       totalSpawned = 0;
 
       // Spawn some initial enemies.
-      for (var i = 0, end = level.initialEnemies; i < end; ++i)
+      for (var i = 0, end = level.properties.initialEnemies; i < end; ++i)
         spawnEnemy();
     },
 
@@ -722,13 +750,37 @@ var example2d = function () {
 
   function drawLevel()
   {
-    ctx.strokeStyle = COLORS.grid;
-    var endX = level.x + level.w - view.x;
-    var endY = level.y + level.h - view.y;
-    for (var y = level.y - view.y; y < endY; y += level.tileSize * 2) {
-      for (var x = level.x - view.x; x < endX; x += level.tileSize * 2) {
-        //ctx.strokeRect(x, y, level.tileSize, level.tileSize);
-        ctx.drawImage(IMAGES.floor, x, y, level.tileSize * 2, level.tileSize * 2);
+    var xTiles = Math.min(level.width, canvas.width / level.tilewidth);
+    var yTiles = Math.min(level.height, canvas.height / level.tileheight);
+
+    var left = ludum.clamp(Math.floor((view.x - level.x) / level.tilewidth), 0, level.width);
+    var right = ludum.clamp(Math.ceil((view.x + canvas.width - level.x) / level.tilewidth), 0, level.width);
+    var bottom = ludum.clamp(Math.floor((view.y - level.y) / level.tileheight), 0, level.height);
+    var top = ludum.clamp(Math.ceil((view.y + canvas.height - level.y) / level.tileheight), 0, level.height);
+
+    var x = level.x - view.x;
+    var y = level.y - view.y;
+
+    for (var l = 0, endL = level.layers.length; l < endL; ++l) {
+      var layer = level.layers[l];
+      for (var r = bottom; r < top; ++r) {
+        var ty = y + r * level.tileheight;
+        for (var c = left; c < right; ++c) {
+          var tx = x + c * level.tilewidth;
+          var tileNum = r * level.width + c;
+          var tileID = layer.data[tileNum];
+          if (tileID === 0)
+            continue;
+          
+          var tileset = level.tilesetByTileID[tileID];
+          tileID -= tileset.firstgid;
+          var scols = Math.ceil(tileset.imagewidth / tileset.tilewidth);
+          var sr = Math.floor(tileID / scols);
+          var sc = tileID % scols;
+          var sx = sc * tileset.tilewidth;
+          var sy = sr * tileset.tileheight;
+          ctx.drawImage(tileset.image, sx, sy, tileset.tilewidth, tileset.tileheight, tx, ty, tileset.tilewidth, tileset.tileheight);
+        }
       }
     }
   }
@@ -782,9 +834,9 @@ var example2d = function () {
     var x = sx;
     var y = sy;
     if (x === undefined)
-      x = level.x + level.tileSize / 2 + Math.floor(Math.random() * level.w / level.tileSize) * level.tileSize;
+      x = level.x + level.properties.tilewidth / 2 + Math.floor(Math.random() * level.w / level.properties.tilewidth) * level.properties.tilewidth;
     if (y === undefined)
-      y = level.y + level.tileSize / 2 + Math.floor(Math.random() * level.h / level.tileSize) * level.tileSize;
+      y = level.y + level.properties.tileheight / 2 + Math.floor(Math.random() * level.h / level.properties.tileheight) * level.properties.tileheight;
     enemy.userData.x = x;
     enemy.userData.y = y;
 
