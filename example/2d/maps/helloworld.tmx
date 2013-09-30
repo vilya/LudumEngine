@@ -18,4 +18,7 @@
    eJztWIFqQjEMjG7qBgoKCm7T6f9/pS0YCDVNrn3v1SIeBMQ0yTU2TeOMiOYZ+QjySc/Ft6NfO/oZle0ttz5n5/HbO3rL/nyPKePtHH8RMiceP46R2+sViMc+0PUl/J6B1vwWQX6D/AX5AtaX8GPfmqDx5BlG8lGy3qtfy573dhLfIfURzyvX1A/ZufD4sb201Xil6zWRPiRHhpYL737RbL09IT40P3FvaR60HHi+a/mlv4XmpzbOGPwYfEZ75ce+euVn5U/WP1obQ+w0yPzJ90TaH63ea/Vh1M57s6ypn/6r9bQ3Pxxaz+2Jn/ZGtPjF3rEMsqLHvjyFTsPe4LcRn7cNdJI7y8ngdxCfjw10uTs9xy+eh/8gF3qcGabQlfJrjVfmN6Qm0ZrN9WyEX21NInpG2rO5JyP8amsS0VtA+0dtTSJ6hjYjR35ynkLn2bGwuMeMIucc9P08NXI1Yb2frfl0TElzJmHlrwe8+Q1D7/xkfXj/B7cW9P3cA+L90+o+qb1/boEuGUc=
   </data>
  </layer>
+ <objectgroup name="Locations" width="40" height="40">
+  <object name="playerSpawnPoint" x="44" y="1232" width="20" height="8"/>
+ </objectgroup>
 </map>

@@ -286,13 +286,29 @@ var example2d = function () {
   var startingGameFuncs = {
     'enter': function (game)
     {
-      // Reset the view position.
-      view.x = -canvas.width / 2.0;
-      view.y = -canvas.height / 2.0;
-
       // Reset the player.
       player = defaultPlayer.newInstance();
       player.start();
+
+      // Put the player at the start point for this level.
+      for (var i = 0, endI = level.layers.length; i < endI; ++i) {
+        var layer = level.layers[i];
+        if (layer.type == "objectgroup" && layer.name == "Locations") {
+          for (var j = 0, endJ = layer.objects.length; j < endJ; ++j) {
+            var obj = layer.objects[j];
+            if (obj.name == "playerSpawnPoint") {
+              player.userData.x = obj.x;
+              player.userData.y = obj.y;
+              break;
+            }
+          }
+          break;
+        }
+      }
+
+      // Make sure the player is inside the view.
+      view.x = ludum.clamp(player.userData.x - canvas.width / 2.0, 0, level.w - canvas.width);
+      view.y = ludum.clamp(player.userData.y - canvas.height / 2.0, 0, level.h - canvas.height);
 
       // Clear out all the old enemies.
       enemies = [];
@@ -561,7 +577,7 @@ var example2d = function () {
     'update': function (player, dt)
     {
       if (player.userData.health <= 0.0) {
-        ludum.changeState(player.DYING);
+        player.changeState(player.DYING);
         return;
       }
 
@@ -758,6 +774,9 @@ var example2d = function () {
 
     for (var l = 0, endL = level.layers.length; l < endL; ++l) {
       var layer = level.layers[l];
+      if (layer.type != "tilelayer")
+        continue;
+
       for (var r = bottom; r < top; ++r) {
         var ty = y + r * level.tileheight;
         for (var c = left; c < right; ++c) {

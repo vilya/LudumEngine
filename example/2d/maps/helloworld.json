@@ -21,6 +21,30 @@
          "width":40,
          "x":0,
          "y":0
+        }, 
+        {
+         "height":40,
+         "name":"Locations",
+         "objects":[
+                {
+                 "height":8,
+                 "name":"playerSpawnPoint",
+                 "properties":
+                    {
+
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":44,
+                 "y":1232
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "width":40,
+         "x":0,
+         "y":0
         }],
  "orientation":"orthogonal",
  "properties":
