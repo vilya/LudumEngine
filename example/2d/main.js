@@ -536,6 +536,18 @@ var example2d = function () {
         var length = Math.sqrt(dx * dx + dy * dy);
         var mx = dx / length * dt * player.userData.speed;
         var my = dy / length * dt * player.userData.speed;
+
+        var col = Math.floor(player.userData.x / level.tilewidth);
+        var row = Math.floor(player.userData.y / level.tileheight);
+        var newCol = Math.floor((player.userData.x + mx) / level.tilewidth);
+        var newRow = Math.floor((player.userData.y + my) / level.tileheight);
+        if (!validTile(newRow, newCol)) {
+          if (!validTile(row, newCol))
+            mx = 0;
+          if (!validTile(newRow, col))
+            my = 0;
+        }
+
         player.userData.x = ludum.clamp(player.userData.x + mx, level.x, level.x + level.w);
         player.userData.y = ludum.clamp(player.userData.y + my, level.y, level.y + level.h);
 
@@ -880,6 +892,18 @@ var example2d = function () {
 
     var msg = attacker.name + " hit " + entity.name + " for " + damage + " points of damage";
     console.log(msg);
+  }
+
+
+  function validTile(row, col)
+  {
+    var layer = level.layers[0]; // The floor layer.
+    if (col < 0 || col >= layer.width)
+      return false;
+    else if (row < 0 || row >= layer.height)
+      return false;
+    var i = row * layer.width + col;
+    return layer.data[i] > 0;
   }
 
 
